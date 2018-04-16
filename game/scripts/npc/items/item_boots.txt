@@ -15,7 +15,7 @@
     "ItemShopTags"                                        "move_speed"
     "ItemQuality"                                         "component"
     "ItemAliases"                                         "boots of speed"
-    "SideShop"                                            "0"
+    "SideShop"                                            "1"
 
     // Special
     //-------------------------------------------------------------------------------------------------------------

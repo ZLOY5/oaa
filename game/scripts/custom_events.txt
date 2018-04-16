@@ -1,0 +1,9 @@
+"CustomEvents"
+{
+	
+	"custom_shop_common_items"
+	{
+		"common_items"					"string"
+	}
+
+}

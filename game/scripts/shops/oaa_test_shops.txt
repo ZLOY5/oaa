@@ -239,6 +239,7 @@
   {
     "item"                                                "item_ward_sentry"
     "item"                                                "item_dust"
+     "item"                                                "item_branches"
   }
 
   // Strategy Screen

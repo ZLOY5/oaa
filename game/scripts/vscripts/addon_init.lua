@@ -11,3 +11,7 @@ if IsClient() then -- Load clientside utility lib
 else
 	require("libraries/talents/talents_server")
 end
+
+if IsClient() then
+	require("components/custom_shop/common_items")
+end

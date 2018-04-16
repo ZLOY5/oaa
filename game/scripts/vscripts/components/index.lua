@@ -22,3 +22,5 @@ require('components/heroselection/index')
 require('components/music/index')
 require('components/items/index')
 require('components/bottlepass/index')
+require('components/custom_shop/index')
+
