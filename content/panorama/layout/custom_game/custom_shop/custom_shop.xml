@@ -6,14 +6,19 @@
 		<include src="s2r://panorama/styles/custom_game/custom_shop/custom_shop_item.css" />
 		<include src="s2r://panorama/styles/custom_game/custom_shop/item_combines.css" />
 		<include src="s2r://panorama/styles/custom_game/custom_shop/common_items.css" />
+		<include src="s2r://panorama/styles/custom_game/custom_shop/search.css" />
+		<include src="s2r://panorama/styles/custom_game/custom_shop/quick_buy.css" />
 	</styles>
  
 	<scripts>
-		<include src="file://{resources}/scripts/custom_game/util.js" />
+		<include src="file://{resources}/scripts/custom_game/custom_shop/util.js" /> 
 		<include src="file://{resources}/scripts/custom_game/custom_shop/items.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/item_combines.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/common_items.js" />
+		<include src="file://{resources}/scripts/custom_game/custom_shop/quick_buy.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/custom_shop.js" />
+		<include src="file://{resources}/scripts/custom_game/custom_shop/search.js" />
+		<include src="file://{resources}/scripts/custom_game/custom_shop/gold.js" />
     </scripts>
 
 	<script>
@@ -24,8 +29,8 @@
 
 		function ClearSearch()
 		{
-		$.DispatchEvent( "DOTAShopCancelSearch" );
 		$( "#SearchTextEntry" ).text = "";
+		$.DispatchEvent("DropInputFocus", $( "#SearchTextEntry" ))
 		}
 	</script>
 
@@ -47,69 +52,86 @@
 			</Panel>
 		</snippet>
 
-		<snippet name="SearchResult">
-			<Panel class="SearchResult" >
-				<Button id="ShopItem" hittest="false" />
-				<Label id="ItemName" text="{s:item_name}" hittest="false" />
-				<Label id="ItemCost" text="{u:item_cost}" hittest="false" />
-			</Panel>
-		</snippet>
-
 	</snippets>
 
-	<Panel class="CustomShop" acceptfocus="true" onfocus="DropInputFocus()" oncancel="DOTAShopHideShop()" require-composition-layer="true" always-cache-composition-layer="true">
-		
-		
-		<Panel id="Main">
 
-			<Panel id="ItemCombines">
-				<Panel id="ConnectorsContainer" >
-					<Panel id="Test" class="Connector"/>
-				</Panel>
-				<Panel id="ItemsContainer" />
-			</Panel>
+	<Panel class="CustomShopRoot" style="width:100%; height:100%;" hittest="false" >
+		<Panel  id="CustomShop" class="CustomShop" acceptfocus="true" onfocus="DropInputFocus()" oncancel="HideShop();" require-composition-layer="true" always-cache-composition-layer="true">
+			<Panel id="Main">
 
-			<Panel id="HeightLimiter" >
-				<Panel id="HeightLimiterContainer"/>
-				<Panel id="SearchContainer" acceptsfocus="true" onfocus="DropInputFocus()">
-					<Panel id="SearchBox">
-						<Panel id="ShopSearchIcon" onactivate="SetSearchFocus();" />
-						<TextEntry id="SearchTextEntry" placeholder="#DOTA_Search" ontextentrychanged="Search()"/>
-						<Button id="ClearSearchButton" class="CloseButton" onactivate="ClearSearch();" />
+				<Panel id="ItemCombines">
+					<Panel id="ConnectorsContainer" >
+						<Panel id="Test" class="Connector"/>
 					</Panel>
+					<Panel id="ItemsContainer" />
 				</Panel>
 
-				<!--<Panel id="GridMainShop" class="ShowPopular ShowHilight">
-					<Button id="RequestSuggestion" onactivate="" onmouseout="UIHideTextTooltip();" onmouseover="UIShowTextTooltip( #DOTA_Shop_Tip_RequestSuggestion );" onload="DOTAAttachHelpTip( 'suggested_items' )" >
-						<Panel id="RequestSuggestionIcon" />
-						<DOTAHeroImage id="RequestSuggestionHeroImage" heroimagestyle="icon" />
-					</Button>
-
-					<Panel id="GridMainTabs" hittest="false" >
-						<DropDown id="TabPicker" />
+				<Panel id="HeightLimiter" >
+					<Panel id="HeightLimiterContainer"/>
+					<Panel id="SearchContainer" acceptsfocus="true" onfocus="DropInputFocus()" defaultfocus="SearchResult0">
+						<Panel id="SearchBox">
+							<Panel id="ShopSearchIcon" onactivate="SetSearchFocus();" />
+							<TextEntry id="SearchTextEntry" placeholder="#DOTA_Search" />
+							<Button id="ClearSearchButton" class="CloseButton" onactivate="ClearSearch();" />
+						</Panel>
+						<Panel id="SearchResults" >
+							<Label id="SearchResultsTitle" text="#DOTA_Shop_Search_Results_Title" />
+							<Panel id="SearchResultsContents"  >
+								<!-- SearchResult instances added by code -->
+							</Panel>
+							<Label class="SearchResultsNoMatches" text="#DOTA_Shop_Search_No_Results" />
+						</Panel>
 					</Panel>
 
-					<Button id="PopularItems" onactivate="ToggleStyle( 'GridMainShop', 'ShowPopular' );" onmouseout="UIHideTextTooltip();" onmouseover="UIShowTextTooltip( #DOTA_Shop_Tip_Popular );">
-						<Panel id="PopularItemsIcon"/>
-					</Button>
+					<Panel id="CommonItems" >
+						<Panel id="CommonItemTitleContainer">
+							<Label class="CommonItemsTitle" text="#dota_item_build_common_items" />
+							 <Button id="EditButton" onactivate="ToggleEditCommonItemsMode();" onmouseout="UIHideTextTooltip();" onmouseover="UIShowTextTooltip(#DOTA_Shop_Tip_EditCommonItems );"/>
+						</Panel>
+						<Panel id="ItemList">
+							<!-- items filled from code -->
+						</Panel>
+					</Panel>
 
-					<Panel id="GridMain" hittest="false" >
-						<Panel id="GridBasic" class="ShopItemsColumns" />
-					</Panel>
-				</Panel>!-->
-
-				<Panel id="CommonItems" >
-					<Panel id="CommonItemTitleContainer">
-						<Label class="CommonItemsTitle" text="#dota_item_build_common_items" />
-						 <Button id="EditButton" onactivate="ToggleEditCommonItemsMode();" onmouseout="UIHideTextTooltip();" onmouseover="UIShowTextTooltip(#DOTA_Shop_Tip_EditCommonItems );"/>
-					</Panel>
-					<Panel id="ItemList">
-						<!-- items filled from code -->
-					</Panel>
 				</Panel>
 
 			</Panel>
-
 		</Panel>
+
+
+		<Panel id="shop_launcher_block" hittest="false" >
+			<Panel id="shop_launcher_bg" />
+			<DOTAStash id="stash" />
+			<Panel id="quickbuy" >
+				<Panel id="QuickBuyRows" >
+					<Label id="Hint" text="#DOTA_Quick_Buy_Hint" />
+					<Panel id="Row0" class="QuickBuyRow" /> <!-- filled from code -->
+					<Panel id="Row1" class="QuickBuyRow" /> <!-- filled from code -->
+					<Panel id="StickyItemSlotContainer" />
+					<Button id="ClearQuickBuy" onactivate="ClearQuickBuy()" />
+				</Panel>
+
+				<Panel id="ShopCourierControls">
+					<Button id="ShopButton" onmouseover="DOTAHUDShowGoldTooltip()" onmouseout="DOTAHUDHideGoldTooltip()" onactivate="ToggleShop();" >
+						<!--<DOTAHotkey id="ShopHotkey" keybind="ShopToggle" hittest="false" />-->
+						<Label id="GoldLabel" hittest="false" class="MonoNumbersFont ShopButtonValueLabel" text="{u:gold}" />
+						<Panel id="GoldIcon" hittest="false" />
+						<!--<Panel id="BuybackHeader" class="LeftRightFlow">
+							<Label id="BuybackLabel" text="#DOTA_Hud_BuybackLabel"/>
+							<Label id="NoBuybackLabel" text="#DOTA_Hud_NoBuybackLabel"/>
+							<Panel id="BuybackDelta" class="LeftRightFlow">
+								<Label id="Plus" class="MonoNumbersFont" text="(+"/>
+								<Label id="NoPlus" class="MonoNumbersFont BuybackValueFont" text="("/>
+								<Label id="BuybackGoldSurplus" class="MonoNumbersFont BuybackValueFont" text="{d:r:buyback_gold_surplus})" />
+								<Label id="BuybackCooldown" class="MonoNumbersFont BuybackValueFont" hittest="false" text="({s:buyback_cooldown})" />
+							</Panel>
+						</Panel>-->
+					</Button>
+					<DOTACourier id="courier" />			
+				</Panel>
+			</Panel>
+		</Panel>
+
+		
 	</Panel>
 </root>

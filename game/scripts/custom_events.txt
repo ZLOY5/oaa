@@ -6,4 +6,9 @@
 		"common_items"					"string"
 	}
 
+	"custom_shop_sticky_item"
+	{
+		"sticky_item"					"string"
+	}
+
 }

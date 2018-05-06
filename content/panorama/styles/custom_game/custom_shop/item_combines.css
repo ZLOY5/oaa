@@ -73,7 +73,7 @@
 // -----------------------------
 // Shop
 
-.CustomShop .CustomShopItem
+#ItemCombines .CustomShopItem
 {
 	width: 40px;
 	height: width-percentage( 72.7% );

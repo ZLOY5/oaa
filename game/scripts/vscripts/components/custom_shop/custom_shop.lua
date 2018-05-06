@@ -47,6 +47,7 @@ function CustomShop:Init()
 	FilterManager:AddFilter(FilterManager.ExecuteOrder, self, Dynamic_Wrap(CustomShop, "OrderFilter"))
 
 	ListenToGameEvent("dota_item_purchased",  Dynamic_Wrap(CustomShop, 'OnItemPurchased'), self)
+	ListenToGameEvent("dota_item_combined",  Dynamic_Wrap(CustomShop, 'OnItemCombined'), self)
 end
 
 function CustomShop:InitTriggers()
@@ -100,6 +101,8 @@ end
 
 function CustomShop:InitItems()
 
+	local itemList = {}
+
 	for itemName,KV  in pairs(KeyValues["ItemKV"]) do --contruct item entries for all items in game
 		if string.find(itemName, "item_") and not self:GetItemEntry(itemName) and type(KV) == "table" then
 			local entry = ItemEntry(itemName)
@@ -109,8 +112,17 @@ function CustomShop:InitItems()
 			if entry.StockTime ~= nil then 
 				table.insert(self.itemsWithStockCount, itemName)
 			end
+
+			table.insert(itemList, itemName)
 		end
 	end
+
+	local strItemList = json.encode(itemList) --lol, max net table key size = 16kb
+	
+	part1 = string.sub(strItemList, 1, 16000)
+	part2 = string.sub(strItemList, 16001)
+	CustomNetTables:SetTableValue("custom_shop", "item_list1", {itemList = part1})
+	CustomNetTables:SetTableValue("custom_shop", "item_list2", {itemList = part2})
 
 	for itemName,entry in pairs(self.itemEntryList) do --populate partOf list of all entries
 		if entry.Requirements then  
@@ -220,7 +232,7 @@ function CustomShop:OrderFilter(filterTable)
 end
 
 
-function CustomShop:OnItemPurchased(event) --these you can 
+function CustomShop:OnItemPurchased(event) 
 	--DeepPrintTable(event)
 
 	local entry = self:GetItemEntry(event.itemname)
@@ -234,13 +246,27 @@ function CustomShop:OnItemPurchased(event) --these you can
 	end
 end
 
+function CustomShop:OnItemCombined(event) 
+	--DeepPrintTable(event)
+
+	local player = PlayerResource:GetPlayer(event.PlayerID)
+	if player then
+		CustomGameEventManager:Send_ServerToPlayer(player, "local_player_item_combined", { itemName = event.itemname } )
+	end
+end
+
 function CDOTA_BaseNPC:SetUnitShopMask(mask)
 	self.customShopMask = mask
+	--print(self:GetUnitName(), mask)
 	
-	local mod = self:AddNewModifier(self, nil, "modifier_custom_shop", nil)
+	--[[local mod = self:AddNewModifier(self, nil, "modifier_custom_shop", nil)
 	if mod then
 		mod:SetStackCount(mask) 
-	end
+	end]]
+
+	CustomNetTables:SetTableValue("custom_shop", "shop_mask_"..self:entindex(), { mask = mask })
+
+	--FireGameEvent("custom_shop_unit_mask_changed", { unit = self:entindex() } )
 end
 
 function CDOTA_BaseNPC:GetUnitShopMask()
@@ -283,7 +309,7 @@ function CDOTA_BaseNPC:GetSlotOfItem(item)
 end
 
 function PrintItems(unit)
-	for i=0,1000 do
+	for i=0,15 do
 		local item = unit:GetItemInSlot(i)
 		if item then
 			print(i,item:GetAbilityName(), item:entindex())

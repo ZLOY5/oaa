@@ -2,21 +2,30 @@
 
 var PlayerTables = GameUI.CustomUIConfig().PlayerTables
 
-
+var shopEntities = [];
 var shopList = [];
 var openedShop = "";
 var popular = null;
 var shopBits = null;
+var shopItems = {};
+var shopOpen = false;
 
 
-function CreateShopItem(itemName, parentPanel) {
-	var item = $.CreatePanel("Button", parentPanel, itemName)
+function CreateShopItem(itemName, parentPanel, id) {
+	
+	if (id == undefined)
+		id = itemName
+
+	var item = $.CreatePanel("Button", parentPanel, id)
 	item.BLoadLayoutSnippet("ShopItem");
 	
 	item.itemname = itemName
 	item.FindChild("ItemImage").itemname = itemName
 	
 	item.SetPanelEvent("onmouseover", function() { 
+		if (item.itemname == "")
+			return 
+		
 		$.DispatchEvent("DOTAShowAbilityShopItemTooltip", item, item.itemname, "", Players.GetLocalPlayerPortraitUnit()) 
 
 		if (item.BHasClass("Combine") || item.commonItem)
@@ -35,7 +44,8 @@ function CreateShopItem(itemName, parentPanel) {
 	})
 
 	item.SetPanelEvent("onactivate", function() { 
-		BuildItem(item.itemname)
+		HideSearch()
+		CombinesBuildItem(item.itemname)
 	})
 
 	item.SetDraggable(true)
@@ -51,6 +61,8 @@ function CreateShopItem(itemName, parentPanel) {
 		dragCallbacks.displayPanel = displayPanel;
         dragCallbacks.offsetX = 0;
         dragCallbacks.offsetY = 0;
+
+        $.GetContextPanel().FindChildTraverse("quickbuy").AddClass("potential_drop_target")
 	})
 
 	$.RegisterEventHandler("DragEnter", item, function(panel, dragCallbacks) {
@@ -76,14 +88,27 @@ function CreateShopItem(itemName, parentPanel) {
 			SetDotaShopCommonItems(commonItems)
 		}
 
+
+		if ( item.stickyItem ) {
+			SetStickyItem(draggedPanel.itemname)
+			draggedPanel.stickyDropped = true
+		}
+
 	})
 	
 	$.RegisterEventHandler("DragEnd", item, function(panelID, draggedPanel) {
 		item.RemoveClass("DraggedShopItem")
 		draggedPanel.DeleteAsync(0)
+
+		$.GetContextPanel().FindChildTraverse("quickbuy").RemoveClass("potential_drop_target")
 	})
 
     UpdateShopItem(item)
+
+    if (shopItems[itemName] == undefined)
+    	shopItems[itemName] = []
+
+    shopItems[itemName].push(item)
 
 	return item
 } 
@@ -128,6 +153,10 @@ function Unhilight(itemName) {
 
 function UpdateShopItem(panel) {
 	var itemName = panel.itemname
+
+    if (itemName == "")
+    	return
+
 	var entry = GetItemEntry(itemName)
 
 	if (entry == undefined)
@@ -163,8 +192,25 @@ function UpdateShopItem(panel) {
 				panel.FindChild("OutOfStockOverlay").style.clip = "radial( 50% 50%, 0deg, "+deg+"deg );" //
 		}
 
+		if (panel.stockUpdateSchedule == undefined) {
+			panel.stockUpdateSchedule = $.Schedule(0, function() {
+				panel.stockUpdateSchedule = null
+				UpdateShopItem(panel)
+			})
+		}
+
 		panel.FindChild("StockAmount").text = entry.StockCount[team]
 	}
+	else {
+		if (panel.stockUpdateSchedule != undefined) {
+			$.CancelScheduled(panel.stockUpdateSchedule)
+			panel.stockUpdateSchedule = null
+		}
+
+		panel.SetHasClass("ShowStockAmount", false)
+		panel.SetHasClass("OutOfStock", false)
+	}
+
 
 	if (popular != null) {
 		panel.SetHasClass("Popular", popular[itemName] == 1)
@@ -223,7 +269,7 @@ function BuyRequest(itemName) {
 	}*/
 
 	
-	var list = GetItemListToCombineItem(itemName)
+	var list = GetItemListToCombineItem(itemName, unit)
 	$.Msg(list)
 
 	if (!HasEnoughGoldForItem(itemName)) {
@@ -245,7 +291,10 @@ function BuyRequest(itemName) {
 	}
 
 	if (combinesCurrentItem == itemName) 
-		CleanCombines()
+		CleanCombines(true)
+
+	if (quickBuyItem == itemName)
+		ClearQuickBuy()
 
 	Game.EmitSound("General.Buy")
 }
@@ -303,10 +352,11 @@ function ConstructShop(shopName, schema) {
 		shop.pageList.sort()
 		
 		var tabPicker = $.CreatePanel("DropDown", shop, "TabPicker")
+		tabPicker.SetDisableFocusOnMouseDown(true)
 		for (var i in shop.pageList) {
 			var pageName = shop.pageList[i]
 			var option = $.CreatePanel("Label", tabPicker, pageName)
-			option.text = $.Localize(pageName)
+			option.text = $.Localize("custom_shop_page_"+pageName).toUpperCase()
 
 			tabPicker.AddOption(option)
 
@@ -341,6 +391,11 @@ function SetOpenedPage(pageName) {
 	if (shop == null) 
 		return
 
+	if (shop.pageList.indexOf(pageName) == -1) {
+		$.Msg("[Custom shop] SetOpenedPage: Unknown page name "+pageName+" for shop "+openedShop)
+		return
+	}
+
 	shop.openedPage = pageName
 
 	if (shop.pageList.length > 1) {
@@ -352,24 +407,126 @@ function SetOpenedPage(pageName) {
 } 
 
 function UpdateShop() {
-	var shop = $.GetContextPanel().FindChildTraverse("GridShop"+openedShop)
 
-	if (shop == null) 
-		return
+	if (shopOpen) {
+		var shop = $.GetContextPanel().FindChildTraverse("GridShop"+openedShop)
 
-	var page = shop.FindChildTraverse(shop.openedPage)
-	
-	if (page == null) 
-		return
+		if (shop == null) 
+			return
 
-	for (var i in page.items) {
-		UpdateShopItem(page.items[i])
+		var page = shop.FindChildTraverse(shop.openedPage)
+		
+		if (page == null) 
+			return
+
+		for (var i in page.items) {
+			UpdateShopItem(page.items[i])
+		}
+
+		UpdateCombines()
+		UpdateCommonItems()
 	}
 
-	UpdateCombines()
-	UpdateCommonItems()
+	UpdateQuickBuy()
 }
 
+function ToggleShop(shopName) {
+	if (shopOpen) 
+		HideShop()
+	else
+		ShowShop(shopName)
+}
+
+function HideShop() {
+	shopOpen = false
+	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopOpen", false)
+	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopClosing", true)
+
+	HideSearch()
+
+	$.GetContextPanel().RemoveClass("StashVisible")
+
+	$.GetContextPanel().FindChildTraverse("stash").RemoveClass("ShopOpen")
+}
+
+function ShowShop(shopName) {
+	shopOpen = true
+	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopOpen", true)
+	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopClosing", false)
+
+	var shopUnit = GetShopUnit()
+
+	if (shopName == undefined) {
+		if (Entities.IsInRangeOfCustomShop(shopUnit, shopBits.CUSTOM_SHOP_Side))
+			shopName = "Side"
+		else
+			shopName = "Home"
+	}
+
+	SetOpenedShop(shopName)
+
+	UpdateShop()
+
+	$.GetContextPanel().AddClass("StashVisible")
+
+	$.GetContextPanel().FindChildTraverse("stash").AddClass("ShopOpen")
+}
+
+function GetShopUnit() { //unit that currently use shop
+		var unit = Players.GetLocalPlayerPortraitUnit()
+		var localPlayerID = Game.GetLocalPlayerID();
+		var playerID = Entities.GetPlayerOwnerID(unit);
+
+		if ( Entities.IsCourier(unit) && ( Entities.GetTeamNumber(unit) == Players.GetTeam(localPlayerID) ) ) 
+			return unit
+
+		if ( playerID === -1 || Entities.GetTeamNumber(unit) !== Players.GetTeam(localPlayerID) ) {
+			return Players.GetPlayerHeroEntityIndex(localPlayerID)
+		}
+
+		return unit
+}
+
+function GetShopKeybind() {
+	return "f4"//FindDotaHudElement(DashboardCore).FindChildTraverse(cstring cstring_1)
+}
+
+function OnUnitShopMaskChanged(unit) {
+	var shopUnit = GetShopUnit()
+
+	//$.Msg( "OnUnitShopMaskChanged " + Entities.GetUnitName(shopUnit) + " " + Entities.GetCustomShopMask(shopUnit) )
+
+	if (shopUnit == unit) {
+		UpdateShopButton()
+	}
+}
+
+function UpdateShopButton() {
+	var shopUnit = GetShopUnit()
+
+	var panel = $.GetContextPanel().FindChildTraverse("shop_launcher_block")
+	panel.SetHasClass("ShopInRange", Entities.GetCustomShopMask(shopUnit) != 0 )
+
+	var playerID = Entities.GetPlayerOwnerID(shopUnit)
+	var data = PlayerTables.GetAllTableValues('gold')
+
+	if (playerID == -1)
+		playerID = Game.GetLocalPlayerID()
+
+	var gold = data.gold[playerID];
+
+
+	var useFormatting = 'half'; 
+	var GoldLabel = panel.FindChildTraverse('GoldLabel');
+  
+	if (useFormatting === 'full') {
+	    GoldLabel.text = FormatGold(gold);
+	} else if (useFormatting === 'half') {
+	    GoldLabel.text = FormatComma(gold);
+	} else {
+	    GoldLabel.text = gold;
+	}
+}
 
 function OnHeroPick(data) {
 	var heroName =  Players.GetPlayerSelectedHero(Game.GetLocalPlayerID())
@@ -381,19 +538,99 @@ function OnHeroPick(data) {
 	}
 }
 
+function OnNetUpdate(table, key, data) {
+	if (key.indexOf("entry_") != -1)
+		ProcessItemEntry(key.replace("entry_",""))
+
+	if (key.indexOf("shop_mask") != -1)
+		OnUnitShopMaskChanged( Number(key.replace("shop_mask_","")) ) 
+}
+
+var previousGold = 0
+function OnGoldChanged(table, data) {
+	UpdateShopButton()
+
+	var gold = data.gold[Game.GetLocalPlayerID()]
+	if ( gold != previousGold ) {
+		UpdateShop()
+		previousGold = gold
+	}
+}
+
+function OnItemCombined(event) {
+	if (combinesCurrentItem == event.itemName) 
+		CleanCombines(true)
+
+	if (quickBuyItem == event.itemName)
+		ClearQuickBuy()
+}
+
+
+function MouseFilter(eventName, arg) {
+	//$.Msg(GameUI.GetClickBehaviors() ,eventName, arg)
+	
+	if ( GameUI.GetClickBehaviors() == CLICK_BEHAVIORS.DOTA_CLICK_BEHAVIOR_NONE 
+		&& ( eventName == "pressed" || eventName == "doublepressed" )
+			&& arg == 0 ) {
+		
+		
+		var target = GetMouseTarget()
+		//$.Msg(shopEntities[target])
+		if ( Entities.IsShop(target) ) { //click on shopkeeper
+			if (shopEntities[target] != undefined ) {
+				ToggleShop(shopEntities[target])
+			}
+			return true  //prevent default click behavior
+		}
+
+
+		//hide shop when left click on ground
+		HideShop()
+	}
+
+	return false
+}
+
+var GoldListener
 (function()
 {
 	GameEvents.Subscribe("dota_player_pick_hero", OnHeroPick)
 	GameEvents.Subscribe("dota_inventory_changed", UpdateShop)
 
-	var schema = CustomNetTables.GetTableValue("custom_shop", "schema")
+	GameEvents.Subscribe('dota_player_update_query_unit', UpdateShopButton)
+    GameEvents.Subscribe('dota_player_update_selected_unit', UpdateShopButton)
+
+	CustomNetTables.SubscribeNetTableListener("custom_shop", OnNetUpdate)
+
+	if (GoldListener == undefined) 
+		GoldListener = PlayerTables.SubscribeNetTableListener('gold', OnGoldChanged)
+
+	GameEvents.Subscribe( "local_player_item_combined", OnItemCombined)
+	
+	//$.RegisterForUnhandledEvent("DOTAHUDToggleShop", ToggleShop)
+	//$.RegisterForUnhandledEvent("DOTAShopHideShop", HideShop)
+	//$.RegisterForUnhandledEvent("DOTAShopShowShop", ShowShop)
+
+	GameUI.SetMouseCallback( MouseFilter )
+
+	//$.RegisterKeyBind(GetDotaHud(), "key_"+GetShopKeybind(), ToggleShop)
+	Game.AddCommand( "togglecustomshop", ToggleShop, "", 0)
+	Game.CreateCustomKeyBind( GetShopKeybind() , "togglecustomshop" )
 
 	shopBits = CustomNetTables.GetTableValue("custom_shop", "shop_bits")
 
+	var schema = CustomNetTables.GetTableValue("custom_shop", "schema")
 	if (typeof(schema) != "undefined") {
 		for ( var shopName in schema) {
 			shopList.push(shopName)
 			ConstructShop(shopName, schema[shopName])	
+
+			var entities = Entities.GetAllEntitiesByName("CUSTOM_SHOP_"+shopName)
+			for ( var entID of entities) {
+				if ( Entities.IsShop(entID) ) {
+					shopEntities[entID] = shopName
+				}
+			}
 		}
 	}
 
@@ -402,49 +639,9 @@ function OnHeroPick(data) {
 
 	OnHeroPick()
 
-	var func = function() {
-		$.Schedule(0.1, func)	
-		UpdateShop()
-	}
-
-	func()
-
 	InitCommonItems()
+	InitQuickBuy() 
+
+	UpdateShopButton()
 
 })();
- 
- 
-Game.PurchaseItem = function(ent, itemid, queue) {
-	var order = {}
-	order.OrderType = dotaunitorder_t.DOTA_UNIT_ORDER_PURCHASE_ITEM
-	order.UnitIndex = ent
-	order.AbilityIndex = itemid
-	order.Queue = queue
-	order.ShowEffects = false
-	Game.PrepareUnitOrders(order)
-}
-
-Entities.IsInRangeOfCustomShop = function(entID, shopMask) {
-	return (Entities.GetCustomShopMask(entID) & shopMask) != 0
-}
-
-Entities.GetCustomShopMask = function(entID) {
-	var buff = Entities.FindModifier(entID, "modifier_custom_shop")
-	
-	if (buff != -1)
-		return Buffs.GetStackCount( entID, buff);
-
-	return 0 
-}
-
-Entities.FindModifier = function(entID, modifierName) {
-	var buffs = Entities.GetNumBuffs(entID)
-
-	for (var i = 0; i <= buffs; i++) {
-		var buff = Entities.GetBuff( entID, i)
-		if ( Buffs.GetName(entID, buff) == modifierName ) {
-			return buff
-		}
-	}
-	return -1
-}

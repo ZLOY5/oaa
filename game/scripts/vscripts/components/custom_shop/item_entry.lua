@@ -11,6 +11,9 @@ local constructor = function(self, itemName)
 	self.IsRecipe = itemData.ItemRecipe == 1
 	self.IsPurchasable = itemData.ItemPurchasable ~= 0
 	self.Aliases = itemData.ItemAliases
+	self.ShopTags = itemData.ItemShopTags
+
+	self.VisibleInInspectTree = itemData.ItemBaseLevel ~= nil
 
 	self.ShopAvailability = 0 --determined by shop schema
 

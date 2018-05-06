@@ -13,5 +13,5 @@ else
 end
 
 if IsClient() then
-	require("components/custom_shop/common_items")
+	require("components/custom_shop/common_sticky_items")
 end

@@ -1,36 +1,63 @@
 "use strict";
 
-var connectors = $.GetContextPanel().FindChildTraverse("ItemCombines").FindChildTraverse("ConnectorsContainer")
-var items = $.GetContextPanel().FindChildTraverse("ItemCombines").FindChildTraverse("ItemsContainer")
+var combinesConnectors = $.GetContextPanel().FindChildTraverse("ItemCombines").FindChildTraverse("ConnectorsContainer")
+var combinesItems = $.GetContextPanel().FindChildTraverse("ItemCombines").FindChildTraverse("ItemsContainer")
 
 var combinesCurrentItem = ""
 
-items.RemoveAndDeleteChildren()
-connectors.RemoveAndDeleteChildren()
+combinesItems.RemoveAndDeleteChildren()
+combinesConnectors.RemoveAndDeleteChildren()
 
-function BuildItem(itemName) {
+function GetOrCreateShopItem(itemName) {
+	var childs = combinesItems.Children()
+
+	for (var panel of childs) {
+		if ( panel.itemname == itemName && !panel.combinesUsed) {
+			panel.combinesUsed = true
+			return panel
+		}
+	}
+
+	var panel = CreateShopItem(itemName, combinesItems)
+	panel.combinesUsed = true
+
+	return panel
+} 
+
+function ClearUsedCombines() {
+	var childs = combinesItems.Children()
+
+	for (var panel of childs) {
+		panel.combinesUsed = false
+	}
+}
+
+
+function CombinesBuildItem(itemName) {
 
 	if (itemName == combinesCurrentItem)
 		return 
 
-	CleanCombines()
+	ClearUsedCombines()
 
 	combinesCurrentItem = itemName
 
 	var entry = GetItemEntry(itemName)
 
-	var bHasReq = false
-	var bHasPart = entry.partOf.length > 0 && entry.partOf[0] != itemName
+	var bHasReq = entry.Requirements != undefined && entry.Requirements.length > 0
+	var bHasPart = entry.partOf.length > 0 
+	/*entry.partOf.indexOf(itemName) == -1 ? entry.partOf.length > 0 : entry.partOf.length > 1*/ 
 
 	//$.Msg(entry.partOf)
 
-	if (entry.Requirements != undefined)
-		bHasReq = true
-
-	var mainItem = CreateShopItem(itemName,items)
+	var mainItem = GetOrCreateShopItem(itemName)
+	if (mainItem.connector != undefined) {
+		mainItem.connector.DeleteAsync(0)
+		mainItem.connector = null
+	}
 	
 	var offset = 20
-	var posMainY = items.desiredlayoutheight/2 - 2 
+	var posMainY = combinesItems.desiredlayoutheight/2 - 2 
 	var posMainX = 320/2 - offset
 
 	var posPartY = posMainY - offset
@@ -60,10 +87,10 @@ function BuildItem(itemName) {
 	var count = entry.partOf.length
 	for (var i = 0; i < count; i++) {
 
-		if (entry.partOf[i] == itemName)
-			continue 
+		/*if (entry.partOf[i] == itemName)
+			continue */
 
-		var item = CreateShopItem(entry.partOf[i], items)
+		var item = GetOrCreateShopItem(entry.partOf[i])
 		
 		var posPartX
 		if (count == 1)
@@ -85,7 +112,6 @@ function BuildItem(itemName) {
 	}
 
 	if (bHasReq) {
-		
 		var list = entry.Requirements[0].slice()
 
 		var recipe = itemName.replace("item_", "item_recipe_")
@@ -100,7 +126,7 @@ function BuildItem(itemName) {
 			if (list[i] == itemName)
 				continue 
 
-			var item = CreateShopItem(list[i], items)
+			var item = GetOrCreateShopItem(list[i])
 			item.requirement = true
 
 			// positioning
@@ -123,12 +149,24 @@ function BuildItem(itemName) {
 			item.connector = AddConnector(item, mainItem)
 		}
 
-
 	}
-}
+
+	CleanCombines(false)
+} 
   
 function AddConnector(from, to) {
-	var connector = $.CreatePanel("Panel", connectors, "")
+	var connector
+
+	if (from.connector != undefined) {
+		connector = from.connector
+	}
+	else if (to.connector != undefined) {
+		connector = to.connector
+		to.connector = null
+	}
+	else {
+		connector = $.CreatePanel("Panel", combinesConnectors, "")
+	}
 	
 	connector.style.width = Distance(from.x, from.y, to.x, to.y)+"px;"
 
@@ -153,18 +191,19 @@ function Angle(x1, y1, x2, y2) {
 	return Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
 }
 
-function CleanCombines() {
-	var childs = items.Children()
+function CleanCombines(bAll) {
+	var childs = combinesItems.Children()
 	try {
 		for (var item of childs) {
-		
-			item.AddClass("Destroying")
-			item.DeleteAsync(0.2)
+			if (bAll || !item.combinesUsed) {
+				item.AddClass("Destroying")
+				item.DeleteAsync(0.2)
 
-			if (item.connector != undefined) {
-				item.connector.AddClass("Destroying")
-				item.connector.DeleteAsync(0.2)
-			} 
+				if (item.connector != undefined) {
+					item.connector.AddClass("Destroying")
+					item.connector.DeleteAsync(0.2)
+				} 
+			}
 		}
 	} catch(e) {}
 	combinesCurrentItem = ""
@@ -175,7 +214,7 @@ function UpdateCombines()
 	var usedItems = []
 	var unit = Players.GetSelectedEntities(Game.GetLocalPlayerID())[0]
 
-	for (var item of items.Children()) {
+	for (var item of combinesItems.Children()) {
 		UpdateShopItem(item)
 
 		if (item.requirement) {

@@ -4,7 +4,7 @@ var itemEntries = {};
 
 function ProcessItemEntry(itemName) {
 	var entry = CustomNetTables.GetTableValue("custom_shop", "entry_"+itemName)
-
+	
 	if (entry == undefined) {
 		$.Msg("[Custom shop] ProcessItemEntry: Unknown item name "+itemName)
 		return
@@ -16,13 +16,19 @@ function ProcessItemEntry(itemName) {
 		for (var i in entry.Requirements) {
 			entry.Requirements[i] = LuaTableToArray(entry.Requirements[i])
 		}
-	}
 
+		
+	}
 
 	entry.partOf = LuaTableToArray(entry.partOf)
 	entry.partOf.sort()
 
 	itemEntries[itemName] = entry
+
+	var list = GetItemListToCombineItem(itemName)
+	entry.GoldCost = GetGoldCostOfItemList(list)
+
+	//UpdateShopItemsWithName(itemName)
 }
 
 
@@ -82,6 +88,7 @@ function IsItemSimple(itemName) {
 
 function GetItemGoldCost(itemName) {
 	var entry = GetItemEntry(itemName)
+	
 	return entry.GoldCost
 }
 
@@ -92,7 +99,16 @@ function GetGoldCostOfItemList(list) {
 		gold = gold + GetItemGoldCost(list[i])
 	}
 
-	return gold
+	return gold 
+}
+
+function IsItemHasStockCount(itemName) {
+	var entry = GetItemEntry(itemName)
+
+	if (entry == undefined) 
+		return false
+
+	return entry.StockCount != undefined
 }
 
 function IsItemOutOfStock(itemName) {
@@ -110,7 +126,7 @@ function IsItemOutOfStock(itemName) {
 }
  
 // return array with names of items that requires to buy for itemName
-function GetItemListToCombineItem(itemName, variant, usedItems) {
+function GetItemListToCombineItem(itemName, unit, variant, usedItems) {
 	var entry = GetItemEntry(itemName)
 	var list = []
 
@@ -119,13 +135,15 @@ function GetItemListToCombineItem(itemName, variant, usedItems) {
 		return list
 	}
 
+	//$.Msg(itemName)
+
 	if (entry.Requirements[variant] == null)
 		variant = 0
 
 	if (usedItems == null)
 		usedItems = []
 
-	var unit = Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID())
+	//var unit = Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID())
 
 	var variantArr = entry.Requirements[variant]
 	
@@ -138,7 +156,7 @@ function GetItemListToCombineItem(itemName, variant, usedItems) {
 		else if ( IsItemSimple(item) ) //just add item to list if it simple
 			list.push(item)
 		else 
-			list.push.apply( list, GetItemListToCombineItem( item, 0, usedItems) )
+			list.push.apply( list, GetItemListToCombineItem( item, unit , 0, usedItems) )
 	}
 
 	var recipe = itemName.replace("item_", "item_recipe_")
@@ -165,8 +183,9 @@ function HasItemListUnpurchasableItems(list) {
 }
 
 function HasEnoughGoldForItem(itemName) {
+	var unit = Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID())
 
-	var itemList = GetItemListToCombineItem(itemName)
+	var itemList = GetItemListToCombineItem(itemName, unit)
 	
 	var goldCost = GetGoldCostOfItemList(itemList)
 	var bEnoughGold = (Players.GetGold(Game.GetLocalPlayerID()) >= goldCost)
@@ -178,6 +197,8 @@ function FindItemByNameInInventory(entIndex, itemName, ignoreList) {
 	
 	//if ( !Entities.HasItemInInventory(entIndex, itemName) ) --does not check stash slots
 	//	return -1
+	if (entIndex == undefined || !Entities.IsValidEntity(entIndex))
+		return -1
 
 	if (ignoreList == null)
 		ignoreList = []
@@ -195,13 +216,3 @@ function FindItemByNameInInventory(entIndex, itemName, ignoreList) {
 
 	return -1
 }
-
-function OnUpdate(table, key, data) {
-	if (key.indexOf("entry_") != -1)
-		ProcessItemEntry(key.replace("entry_",""))
-}
-
-(function()
-{
-	CustomNetTables.SubscribeNetTableListener("custom_shop", OnUpdate)
-})();
