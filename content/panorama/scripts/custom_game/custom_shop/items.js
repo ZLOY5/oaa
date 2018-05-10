@@ -76,7 +76,7 @@ function IsItemAvailable(itemName, shopMask) {
 	if (entry == undefined) 
 		return false
 
-    return (entry.ShopAvailability & shopMask) != 0
+	return (entry.ShopAvailability & shopMask) != 0
 }
 
 function IsItemSimple(itemName) {

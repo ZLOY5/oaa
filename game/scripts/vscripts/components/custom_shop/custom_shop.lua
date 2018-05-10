@@ -10,10 +10,7 @@ LinkLuaModifier("modifier_custom_shop", "modifiers/modifier_custom_shop.lua", LU
 function CustomShop:Init()
 	self.itemEntryList = {}
 	self.itemsWithStockCount = {}
-
 	self.schema = require('components/custom_shop/schema')
-	CustomNetTables:SetTableValue("custom_shop", "schema", self.schema)
-
 	self.shopBits = {}
 	local i = 0
 	for shopName,_ in pairs(self.schema) do
@@ -23,8 +20,10 @@ function CustomShop:Init()
 		i = i + 1
 	end
 	CustomNetTables:SetTableValue("custom_shop", "shop_bits", self.shopBits)
-	
+
 	CustomShop:InitItems()
+	CustomNetTables:SetTableValue("custom_shop", "schema", self.schema)
+
 	CustomShop:InitTriggers() -- triggers must be named CUSTOM_SHOP_..shopName, example: CUSTOM_SHOP_Home
 
 	--DeepPrintTable(self:GetItemEntry("item_vladmir"))
@@ -100,10 +99,10 @@ end
 
 
 function CustomShop:InitItems()
-
 	local itemList = {}
 
-	for itemName,KV  in pairs(KeyValues["ItemKV"]) do --contruct item entries for all items in game
+	 --contruct item entries for all items in game
+	for itemName,KV  in pairs(KeyValues["ItemKV"]) do
 		if string.find(itemName, "item_") and not self:GetItemEntry(itemName) and type(KV) == "table" then
 			local entry = ItemEntry(itemName)
 		
@@ -117,14 +116,15 @@ function CustomShop:InitItems()
 		end
 	end
 
-	local strItemList = json.encode(itemList) --lol, max net table key size = 16kb
+	local strItemList = json.encode(itemList) --max net table key size = 16kb
 	
 	part1 = string.sub(strItemList, 1, 16000)
 	part2 = string.sub(strItemList, 16001)
 	CustomNetTables:SetTableValue("custom_shop", "item_list1", {itemList = part1})
 	CustomNetTables:SetTableValue("custom_shop", "item_list2", {itemList = part2})
 
-	for itemName,entry in pairs(self.itemEntryList) do --populate partOf list of all entries
+	--populate partOf list of all entries
+	for itemName,entry in pairs(self.itemEntryList) do 
 		if entry.Requirements then  
 			for n,req in pairs(entry.Requirements) do
 				for i=1,#req do
@@ -138,17 +138,21 @@ function CustomShop:InitItems()
 		end
 	end
 
+	--set shop availability for each item in schema and remove bad item names from schema
+	local itemName
 	for shop,shopSchema in pairs(self.schema) do
 		local shopName = "CUSTOM_SHOP_"..shop
-		for _,pageSchema in pairs(shopSchema) do
-			for _,column in pairs(pageSchema) do
-				for _,itemName in pairs(column) do
+		for page,pageSchema in pairs(shopSchema) do
+			for col,column in pairs(pageSchema) do
+				for i = #column, 1, -1 do
+					itemName = column[i]
 					local entry = self:GetItemEntry(itemName)
 
 					if entry then
 						entry:SetAvailableInShop(CustomShop.shopBits[shopName], true)
 					else
-						print("[Custom Shop] InitItems: Unknown item name in schema "..itemName)
+						print("[Custom Shop] Unknown item "..itemName.." in schema "..shop.. ":"..page..":"..col)
+						table.remove(column, i)
 					end
 				end
 			end

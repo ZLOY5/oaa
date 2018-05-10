@@ -9,7 +9,7 @@
 		<include src="s2r://panorama/styles/custom_game/custom_shop/search.css" />
 		<include src="s2r://panorama/styles/custom_game/custom_shop/quick_buy.css" />
 	</styles>
- 
+
 	<scripts>
 		<include src="file://{resources}/scripts/custom_game/custom_shop/util.js" /> 
 		<include src="file://{resources}/scripts/custom_game/custom_shop/items.js" />
@@ -19,7 +19,7 @@
 		<include src="file://{resources}/scripts/custom_game/custom_shop/custom_shop.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/search.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/gold.js" />
-    </scripts>
+	</scripts>
 
 	<script>
 		function SetSearchFocus()
@@ -42,13 +42,13 @@
 				<Panel id="PopularOverlay" hittest="false">
 					<Panel id="PopularIcon" hittest="false"/>
 				</Panel>
-				<Panel id="PlayerSuggestedOverlay" hittest="false" />
+				<!--<Panel id="PlayerSuggestedOverlay" hittest="false" />-->
 				<Panel id="OwnedTick" hittest="false" />
-				<Panel id="SecretShop" hittest="false" />
+				<!--<Panel id="SecretShop" hittest="false" />-->
 				<Label id="StockAmount" text="{u:stock_amount}" />
 				<Panel id="OutOfStockOverlay" hittest="false" />
-				<Label id="SuggestionPct" hittest="false" text="{s:suggestion_pct}%"/>
-				<Panel id="SequenceArrow" hittest="false"/>
+				<!--<Label id="SuggestionPct" hittest="false" text="{s:suggestion_pct}%"/>
+				<!--<Panel id="SequenceArrow" hittest="false"/>-->
 			</Panel>
 		</snippet>
 
@@ -60,9 +60,7 @@
 			<Panel id="Main">
 
 				<Panel id="ItemCombines">
-					<Panel id="ConnectorsContainer" >
-						<Panel id="Test" class="Connector"/>
-					</Panel>
+					<Panel id="ConnectorsContainer" />
 					<Panel id="ItemsContainer" />
 				</Panel>
 

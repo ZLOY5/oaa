@@ -4,8 +4,8 @@
 	height: width-percentage( 72.7% );
 	margin-top: 3px;
 	margin-bottom: 3px;
-    margin-right: 6px;
-    margin-left: 4px;
+	margin-right: 6px;
+	margin-left: 4px;
 }
 
 @define headerHeight: 47px;
@@ -86,16 +86,16 @@
 }
 #HeightLimiterContainer
 {
-    background-image: url("s2r://panorama/images/hud/reborn/bg_mainshop_psd.vtex");
-    background-size: cover;
-    background-repeat: no-repeat;
-    width: 100%;
-    height: 100%;
+	background-image: url("s2r://panorama/images/hud/reborn/bg_mainshop_psd.vtex");
+	background-size: cover;
+	background-repeat: no-repeat;
+	width: 100%;
+	height: 100%;
 }
 
 .HUDFlipped #HeightLimiterContainer
 {
-    transform: scaleX(-1);
+	transform: scaleX(-1);
 }
 
 #CommonItems
@@ -103,9 +103,9 @@
 	width: 100%;
 	vertical-align: bottom;
 	padding-bottom: 6px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #1c2027 ), to( #010101 ) );
-    background-image: url("s2r://panorama/images/hud/reborn/bg_pinned_items_psd.vtex");
-    background-size: cover;
+	background-color: gradient( linear, 0% 0%, 0% 100%, from( #1c2027 ), to( #010101 ) );
+	background-image: url("s2r://panorama/images/hud/reborn/bg_pinned_items_psd.vtex");
+	background-size: cover;
 }
 
 #ItemsArea
@@ -139,15 +139,15 @@
 	width: 100%;
 	visibility: visible;
 	overflow: clip squish;
-    min-height: 447px;
+	min-height: 447px;
 }
 
 #MainShop
 {
 	flow-children: down;
-    background-image: url("s2r://panorama/images/hud/reborn/main_shop_bg_psd.vtex");
-    background-repeat: no-repeat;
-    width: 100%;
+	background-image: url("s2r://panorama/images/hud/reborn/main_shop_bg_psd.vtex");
+	background-repeat: no-repeat;
+	width: 100%;
 }
 
 .GridShop,
@@ -155,32 +155,32 @@
 	width: 100%;
 	//visibility: collapse;
 	margin-top: 54px;
-    margin-bottom: 4px;
+	margin-bottom: 4px;
 }
 
 .ShowSearchResults #SearchContainer
 {
-    background-image: url("s2r://panorama/images/hud/reborn/bg_search_results_psd.vtex");
-    box-shadow: #00000055 -2px -2px 4px 4px;
-    border-top: 1px solid #373f45;
+	background-image: url("s2r://panorama/images/hud/reborn/bg_search_results_psd.vtex");
+	box-shadow: #00000055 -2px -2px 4px 4px;
+	border-top: 1px solid #373f45;
 }
 
 #SearchShadow
 {
-    background-image: url("s2r://panorama/images/hud/reborn/shop_search_shadow_psd.vtex");
-    background-repeat: no-repeat;
-    background-size: cover;
-    width: 100%;
-    height: 12px;
-    visibility: collapse;
-    vertical-align: top;
-    z-index: 1000;
-    margin-top: -12px;
+	background-image: url("s2r://panorama/images/hud/reborn/shop_search_shadow_psd.vtex");
+	background-repeat: no-repeat;
+	background-size: cover;
+	width: 100%;
+	height: 12px;
+	visibility: collapse;
+	vertical-align: top;
+	z-index: 1000;
+	margin-top: -12px;
 }
 
 .ShowSearchResults #SearchShadow
 {
-    visibility: visible;
+	visibility: visible;
 }
 
 #SearchContainer
@@ -200,8 +200,8 @@
 {
 	flow-children: right;
 	background-color: black;
-    border-radius: 3px;
-    border: 1px solid #3d464c;
+	border-radius: 3px;
+	border: 1px solid #3d464c;
 }
 
 #SearchTextEntry
@@ -250,33 +250,69 @@
 
 #TabPicker
 {
-	width: 234px;
-	height: 30px;
-	background-image: none;
-	background-color: #57646d77;
-	horizontal-align:center;
+	/*margin-top: 45px;*/
+	margin-bottom: 12px;
+	margin-left: 10px;
 
+	flow-children: right;
+	horizontal-align: left;
+	border: 1px solid #5b687277;
 	border-radius: 3px;
+
+	//width: 250px;
+}
+
+#TabPicker RadioButton
+{
+	min-width: 39px;
+	//width: fill-parent-flow( 1.0 );
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 6px;
+	padding-bottom: 3px;
+	background-color: black;
+}
+
+#TabPicker RadioButton:selected
+{
+	background-color: #57646d77;
+}
+
+#TabPicker RadioButton:selected Label
+{
+	color: white;
+}
+
+#TabPicker .RadioBox
+{
+	visibility: collapse;
 }
 
 #TabPicker Label
 {
-	margin: 0px;
-	width: 100%;
-	vertical-align: center;
+	color: #5b6872;
 	horizontal-align: center;
-
-	text-align: center;
+	font-size: 15px;
 	letter-spacing: 1px;
 	font-weight: bold;
-	color: white;
-
-	font-size: 16px;
-
-	transition-duration: 0s;
+	
+	//margin-right: 3px;
+	margin-left: 0px;
+	
+	text-align: center;
 }
 
-#TabPicker:hover
+#TabPicker .SelectedPage
+{
+	 background-color: #57646d77;
+}
+
+#TabPicker RadioButton:hover Label
+{
+	color: white;
+}
+
+/*#TabPicker:hover
 {
 	background-color: #57646d;
 }
@@ -318,19 +354,19 @@ DropDownMenu .DropDownChild:hover
 
 	color: white;
 	background-color: #57646d77;
-}
+}*/
 
 
 #RequestSuggestion
 {
-    width: 28px;
-    height: 28px;
-    horizontal-align: left;
-    vertical-align: top;
-    margin-left: 11px;
-    //wash-color: #798b99;
-    tooltip-position: top;
-   	border: 1px solid #5b687277; 
+	width: 28px;
+	height: 28px;
+	horizontal-align: left;
+	vertical-align: top;
+	margin-left: 11px;
+	//wash-color: #798b99;
+	tooltip-position: top;
+	border: 1px solid #5b687277; 
 	border-radius: 3px;
 	
 	background-color: black;
@@ -348,11 +384,11 @@ DropDownMenu .DropDownChild:hover
 {
 	width: 100%;
 	height: 100%;
-    background-image: url("s2r://panorama/images/hud/reborn/icon_suggest_item_psd.vtex");
-    background-size: 72%;
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
-    brightness: 0.5;
+	background-image: url("s2r://panorama/images/hud/reborn/icon_suggest_item_psd.vtex");
+	background-size: 72%;
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	brightness: 0.5;
 }
 
 #RequestSuggestionHeroImage
@@ -364,7 +400,7 @@ DropDownMenu .DropDownChild:hover
 
 #RequestSuggestion:active #RequestSuggestionIcon
 {
-    brightness: 1.0;
+	brightness: 1.0;
 }
 
 .PlayerRequestingItems #RequestSuggestion
@@ -385,15 +421,15 @@ DropDownMenu .DropDownChild:hover
 
 #PopularItems
 {
-    width: 28px;
-    height: 28px;
-    horizontal-align: right;
-    vertical-align: top;
-    //margin-top: 1px;
-    margin-right: 11px;
-    //wash-color: #798b99;
-    tooltip-position: top;
-   	border: 1px solid #5b687277; 
+	width: 32px;
+	height: 32px;
+	horizontal-align: right;
+	vertical-align: top;
+	margin-top: 0px;
+	margin-right: 10px;
+	//wash-color: #798b99;
+	tooltip-position: top;
+	border: 1px solid #5b687277; 
 	border-radius: 3px;
 	
 	background-color: black;
@@ -406,16 +442,16 @@ DropDownMenu .DropDownChild:hover
 {
 	width: 100%;
 	height: 100%;
-    background-image: url("s2r://panorama/images/icon_star_shadow_psd.vtex");
-    background-size: 72%;
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
+	background-image: url("s2r://panorama/images/icon_star_shadow_psd.vtex");
+	background-size: 72%;
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
 	wash-color: #798b99;
 }
 
 .ShowPopular #PopularItems
 {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #acc0e566 ), color-stop( 0.4, #94b1e566 ), color-stop( 0.6, #94b1e566 ), to( #81a5e566 ) );
+	background-color: gradient( linear, 0% 0%, 0% 100%, from( #acc0e566 ), color-stop( 0.4, #94b1e566 ), color-stop( 0.6, #94b1e566 ), to( #81a5e566 ) );
 	//wash-color: #eeeeff;
 }
 
@@ -426,7 +462,7 @@ DropDownMenu .DropDownChild:hover
 
 #PopularItems:hover
 {
-    brightness: 2;
+	brightness: 2;
 }
 
 
@@ -460,8 +496,8 @@ DropDownMenu .DropDownChild:hover
 	height: width-percentage( 72.7% );
 	margin-top: 3px;
 	margin-bottom: 3px;
-    margin-right: 6px;
-    margin-left: 4px;
+	margin-right: 4px;
+	margin-left: 4px;
 }
 
 #ShopSearchIcon
@@ -474,7 +510,7 @@ DropDownMenu .DropDownChild:hover
 	width: 26px;
 	vertical-align: center;
 	margin-left: 4px;
-    wash-color: #8da1b1;
+	wash-color: #8da1b1;
 }
 
 .CustomShopTextEntry
@@ -584,17 +620,17 @@ DropDownMenu .DropDownChild:hover
 
 .Reborn #stash.QuickBuyRows0.ShopOpen
 {
-    transform: translateY(16px);
+	transform: translateY(16px);
 }
 
 .Reborn #stash.QuickBuyRows1
 {
-    transform: translateY(16px);
+	transform: translateY(16px);
 }
 
 .Reborn #stash.QuickBuyRows1.ShopOpen
 {
-    transform: translateY(16px);
+	transform: translateY(16px);
 }
 
 .Reborn #stash.QuickBuyRows2

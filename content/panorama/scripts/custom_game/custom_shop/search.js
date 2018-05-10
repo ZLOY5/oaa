@@ -1,6 +1,6 @@
 "use strict";
 
-var seacrhItemList  
+var seacrhItemList
 
 var searchContainer = $.GetContextPanel().FindChildTraverse("SearchContainer")
 var searchTextEntry = $.GetContextPanel().FindChildTraverse("SearchBox").FindChildTraverse("SearchTextEntry")
@@ -45,7 +45,6 @@ function SearchTextChange() {
 	$.GetContextPanel().AddClass("ShowSearchResults")
 
 
-
 	var res = SearchItems( text.trim().toLowerCase().split(/\s+/) )
 
 	searchResult.SetHasClass("Empty", res.length == 0)
@@ -60,11 +59,11 @@ function SearchTextChange() {
 			panel.RemoveClass("Hidden")
 
 			panel.itemname = res[i]
- 
- 			if (i == 0) {
- 				panel.SetFocus() //todo: focus on textentry and seachresult together like in def dota shop
- 				//searchContainer.SetFocus()
- 			}
+
+			if (i == 0) {
+				panel.SetFocus() //todo: focus on textentry and seachresult together like in def dota shop
+				//searchContainer.SetFocus()
+			}
 		}
 		else {
 			panel.AddClass("Hidden")
@@ -79,7 +78,6 @@ function SearchItems(list) {
 
 	var resultsByStartOfName = []
 	var resultsOther = []
-
 
 	for (var itemName of seacrhItemList) {
 			
@@ -112,17 +110,13 @@ function SearchItems(list) {
 		}
 
 		if (count >= list.length) { //item meets all conditions
-
 			if ( startOfName ) {
 				resultsByStartOfName.push(itemName)
 			}
 			else {
 				resultsOther.push(itemName)
 			}
-
 		}
-
-
 	}
 
 	SortItemListByGoldCost(resultsByStartOfName)
@@ -134,14 +128,14 @@ function SearchItems(list) {
 }
 
 function unique(arr) {
-  var obj = {};
+	var obj = {};
 
-  for (var i = 0; i < arr.length; i++) {
-    var str = arr[i];
-    obj[str] = true; 
-  }
+	for (var i = 0; i < arr.length; i++) {
+		var str = arr[i];
+		obj[str] = true; 
+	}
 
-  return Object.keys(obj);
+	return Object.keys(obj);
 }
 
 
@@ -177,14 +171,14 @@ function HideSearch() {
 }
 
 function InitSearch() {
-    searchResult.AddClass("Hidden")
-    $.GetContextPanel().RemoveClass("ShowSearchResults")
+	searchResult.AddClass("Hidden")
+	$.GetContextPanel().RemoveClass("ShowSearchResults")
 
 	for (var i = 0; i < 12; i++) {
 		CreateSearchResult(i)
 	}
 
-    seacrhItemList = GetSearchItemList()
+	seacrhItemList = GetSearchItemList()
 
 	searchTextEntry.SetPanelEvent("ontextentrychange", SearchTextChange)
 	searchTextEntry.SetPanelEvent("onfocus", SearchTextChange)
@@ -197,35 +191,35 @@ function InitSearch() {
 function CreateSearchResult(number) {
 	var panel = $.CreatePanel("Button", searchResultContents, "SearchResult"+number)
 	panel.BLoadLayoutFromString('<root><Button selectionpos="auto"/></root>', true, true)
-    panel.AddClass("SearchResult")
-    panel.AddClass("Hidden") 
+	panel.AddClass("SearchResult")
+	panel.AddClass("Hidden") 
 
-    panel.SetAcceptsFocus(false)
-    panel.inputnamespace = "custom_shop_search"
+	panel.SetAcceptsFocus(false)
+	panel.inputnamespace = "custom_shop_search"
 
-    var shopitem = CreateShopItem("item_branches", panel, "ShopItem")
-    shopitem.hittest = false
+	var shopitem = CreateShopItem("item_branches", panel, "ShopItem")
+	shopitem.hittest = false
 
-    var namePanel = $.CreatePanel("Label", panel, "ItemName")
-    namePanel.hittest = false
+	var namePanel = $.CreatePanel("Label", panel, "ItemName")
+	namePanel.hittest = false
 
-    var costPanel = $.CreatePanel("Label", panel, "ItemCost")
-    costPanel.hittest = false
+	var costPanel = $.CreatePanel("Label", panel, "ItemCost")
+	costPanel.hittest = false
 
-    Object.defineProperty(panel, "itemname", {
+	Object.defineProperty(panel, "itemname", {
 
-  		set: function(value) {
-  			this.itemName = value
-      		
-      		shopitem.itemname = value
-      		shopitem.FindChild("ItemImage").itemname = value
+		set: function(value) {
+			this.itemName = value
+			
+			shopitem.itemname = value
+			shopitem.FindChild("ItemImage").itemname = value
 
-      		UpdateShopItem(shopitem)
+			UpdateShopItem(shopitem)
 
-      		namePanel.text = LocalizeItem(value)
+			namePanel.text = LocalizeItem(value)
 
-      		costPanel.text = GetItemGoldCost(value)
-      	}
+			costPanel.text = GetItemGoldCost(value)
+		}
 	});
 
 	panel.SetPanelEvent("onmouseover", function() { 
@@ -236,7 +230,7 @@ function CreateSearchResult(number) {
 
 	})
 
-    panel.SetPanelEvent("onmouseout", function() { 
+	panel.SetPanelEvent("onmouseout", function() { 
 		$.DispatchEvent("DOTAHideAbilityTooltip", panel) 
 	})
 
@@ -255,12 +249,12 @@ function CreateSearchResult(number) {
 		$.DispatchEvent("DOTAHideAbilityTooltip", panel)
 
 		var displayPanel = $.CreatePanel( "DOTAItemImage", $.GetContextPanel(), "dragImage" )
-        displayPanel.itemname = panel.itemName
-        displayPanel.customShopItem = true
+		displayPanel.itemname = panel.itemName
+		displayPanel.customShopItem = true
 
 		dragCallbacks.displayPanel = displayPanel;
-        dragCallbacks.offsetX = 0;
-        dragCallbacks.offsetY = 0;
+		dragCallbacks.offsetX = 0;
+		dragCallbacks.offsetY = 0;
 	})
 
 

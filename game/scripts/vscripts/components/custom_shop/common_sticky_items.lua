@@ -1,12 +1,12 @@
 
 local function SetCommonItems(event)
-    SendToConsole("dota_shop_common_items "..event.common_items)
-    SendToConsole("host_writeconfig")
+	SendToConsole("dota_shop_common_items "..event.common_items)
+	SendToConsole("host_writeconfig")
 end
 
 local function SetStickyItems(event)
-    SendToConsole("hud_sticky_item_name "..event.sticky_item)
-    SendToConsole("host_writeconfig")
+	SendToConsole("hud_sticky_item_name "..event.sticky_item)
+	SendToConsole("host_writeconfig")
 end
 
 local wrapper = {}

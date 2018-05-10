@@ -2,7 +2,7 @@
 
 #SearchResults
 {
-    flow-children: down;
+	flow-children: down;
 }
 
 #SearchResults.Hidden
@@ -12,25 +12,25 @@
 
 #SearchResultsTitle
 {
-    color: white;
-    font-size: 14px;
-    margin-bottom: 6px;
-    margin-top: 6px;
-    letter-spacing: 2px;
+	color: white;
+	font-size: 14px;
+	margin-bottom: 6px;
+	margin-top: 6px;
+	letter-spacing: 2px;
 }
 
 #SearchResultsContents
 {
-    flow-children: down;
-    width: 100%;
+	flow-children: down;
+	width: 100%;
 }
 
 .SearchResultsNoMatches
 {
-    color: #dc3535;
-    visibility: collapse;
-    font-size: 15px;
-    padding-left: 2px;
+	color: #dc3535;
+	visibility: collapse;
+	font-size: 15px;
+	padding-left: 2px;
 }
 
 .Empty .SearchResultsNoMatches

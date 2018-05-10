@@ -11,8 +11,8 @@
 #ItemImage
 {
 	width: 100%;
-    transition-property: brightness;
-    transition-duration: 0.2s;
+	transition-property: brightness;
+	transition-duration: 0.2s;
 	vertical-align: top;
 }
 
@@ -48,8 +48,8 @@
 	width: 100%;
 	height: width-percentage( 72.7% );
 	visibility: collapse;
-    transition-property: background-color;
-    transition-duration: 0.2s;
+	transition-property: background-color;
+	transition-duration: 0.2s;
 }
 
 #PopularOverlay
@@ -74,13 +74,13 @@
 	width: 100%;
 	height: 100%;
 	box-shadow: 0px 0px 5px 0px #ea67db60;
- 	visibility: collapse;
+	visibility: collapse;
 }
 
 
 #StartingItemsInventory #ItemImage
 {
-    background-image: url("s2r://panorama/images/hud/reborn/inventory_item_well_psd.vtex");
+	background-image: url("s2r://panorama/images/hud/reborn/inventory_item_well_psd.vtex");
 }
 
 /* We still want to display the background in the pre-game inventory even if it's empty */
@@ -98,16 +98,16 @@
 .CanPurchase #CanPurchaseOverlay
 {
 	border: 1px solid #CD9607;
-  	visibility: visible;
+	visibility: visible;
 }
 
 .CanPurchaseAtSecretShop #CanPurchaseOverlay
 {
 	border: 1px solid #C80506;
-  	visibility: visible;
+	visibility: visible;
 }
 
- .ShowHilight #ItemImage, .ShowPopular.ShowHilight .Popular.Hilighted #ItemImage
+.ShowHilight #ItemImage, .ShowPopular.ShowHilight .Popular.Hilighted #ItemImage
 {
 	brightness: 1;
 }
@@ -117,12 +117,12 @@
 	brightness: 4;
 }
 
- .ShowHilight #CanPurchaseOverlay, .ShowPopular.ShowHilight .Popular #CanPurchaseOverlay
+.ShowHilight #CanPurchaseOverlay, .ShowPopular.ShowHilight .Popular #CanPurchaseOverlay
 {
 	visibility: visible;
 }
 
- .ShowHilight .Hilighted #CanPurchaseOverlay, .ShowPopular.ShowHilight .Popular.Hilighted #CanPurchaseOverlay
+.ShowHilight .Hilighted #CanPurchaseOverlay, .ShowPopular.ShowHilight .Popular.Hilighted #CanPurchaseOverlay
 {
 	visibility: visible;
 	background-color: #ffffff08;
@@ -136,25 +136,25 @@
 
 .ShowPopular .Popular #PopularOverlay
 {
-  	visibility: visible;
+	visibility: visible;
 }
 
 .ShowPopular .Popular #CanPurchaseOverlay
 {
 	border: 2px solid #a7bde5;
-  	visibility: visible;
+	visibility: visible;
 }
 
 .PlayerSuggested #PlayerSuggestedOverlay
 {
-  	visibility: visible;
+	visibility: visible;
 }
 
 #OwnedTick
 {
 	horizontal-align: right;
 	vertical-align: top;
-    margin-right: 1px;
+	margin-right: 1px;
 	width: 13px;
 	height: 13px;
 	visibility: collapse;
@@ -174,8 +174,8 @@
 	width: 13px;
 	height: 13px;
 	visibility: collapse;
-    margin-bottom: 2px;
-    margin-right: 1px;
+	margin-bottom: 2px;
+	margin-right: 1px;
 }
 
 .SecretShopItem:not(.MainShopItem) #SecretShop

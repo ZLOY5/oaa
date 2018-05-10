@@ -55,14 +55,14 @@ function CreateShopItem(itemName, parentPanel, id) {
 		$.DispatchEvent("DOTAHideAbilityTooltip", item)
 
 		var displayPanel = $.CreatePanel( "DOTAItemImage", $.GetContextPanel(), "dragImage" )
-        displayPanel.itemname = item.itemname
-        displayPanel.customShopItem = true
+		displayPanel.itemname = item.itemname
+		displayPanel.customShopItem = true
 
 		dragCallbacks.displayPanel = displayPanel;
-        dragCallbacks.offsetX = 0;
-        dragCallbacks.offsetY = 0;
+		dragCallbacks.offsetX = 0;
+		dragCallbacks.offsetY = 0;
 
-        $.GetContextPanel().FindChildTraverse("quickbuy").AddClass("potential_drop_target")
+		$.GetContextPanel().FindChildTraverse("quickbuy").AddClass("potential_drop_target")
 	})
 
 	$.RegisterEventHandler("DragEnter", item, function(panel, dragCallbacks) {
@@ -103,12 +103,12 @@ function CreateShopItem(itemName, parentPanel, id) {
 		$.GetContextPanel().FindChildTraverse("quickbuy").RemoveClass("potential_drop_target")
 	})
 
-    UpdateShopItem(item)
+	UpdateShopItem(item)
 
-    if (shopItems[itemName] == undefined)
-    	shopItems[itemName] = []
+	if (shopItems[itemName] == undefined)
+		shopItems[itemName] = []
 
-    shopItems[itemName].push(item)
+	shopItems[itemName].push(item)
 
 	return item
 } 
@@ -154,8 +154,8 @@ function Unhilight(itemName) {
 function UpdateShopItem(panel) {
 	var itemName = panel.itemname
 
-    if (itemName == "")
-    	return
+	if (itemName == "")
+		return
 
 	var entry = GetItemEntry(itemName)
 
@@ -351,22 +351,22 @@ function ConstructShop(shopName, schema) {
 
 		shop.pageList.sort()
 		
-		var tabPicker = $.CreatePanel("DropDown", shop, "TabPicker")
-		tabPicker.SetDisableFocusOnMouseDown(true)
+		var tabPicker = $.CreatePanel("Panel", shop, "TabPicker")
+		
 		for (var i in shop.pageList) {
 			var pageName = shop.pageList[i]
-			var option = $.CreatePanel("Label", tabPicker, pageName)
-			option.text = $.Localize("custom_shop_page_"+pageName).toUpperCase()
+			var option = $.CreatePanel("RadioButton", tabPicker, pageName)
+			var label = $.CreatePanel("Label", option, "")
+			label.text = $.Localize("custom_shop_page_"+pageName)
 
-			tabPicker.AddOption(option)
-
-			tabPicker.SetPanelEvent("oninputsubmit", function() {
-				SetOpenedPage(tabPicker.GetSelected().id)
+			
+			option.SetPanelEvent("onactivate", function() {
+				SetOpenedPage(option.GetSelectedButton().id)
 			})
 
 		}
 
-		tabPicker.SetSelected(shop.pageList[0])
+		//tabPicker.SetSelected(shop.pageList[0])
 		shop.openedPage = shop.pageList[0]
 
 		AddPopularButton(shop)
@@ -430,6 +430,10 @@ function UpdateShop() {
 	UpdateQuickBuy()
 }
 
+function ToggleShopKey() {
+	ToggleShop()
+}
+
 function ToggleShop(shopName) {
 	if (shopOpen) 
 		HideShop()
@@ -443,6 +447,7 @@ function HideShop() {
 	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopClosing", true)
 
 	HideSearch()
+	CleanCombines(true)
 
 	$.GetContextPanel().RemoveClass("StashVisible")
 
@@ -456,6 +461,7 @@ function ShowShop(shopName) {
 
 	var shopUnit = GetShopUnit()
 
+	$.Msg(shopName)
 	if (shopName == undefined) {
 		if (Entities.IsInRangeOfCustomShop(shopUnit, shopBits.CUSTOM_SHOP_Side))
 			shopName = "Side"
@@ -518,13 +524,13 @@ function UpdateShopButton() {
 
 	var useFormatting = 'half'; 
 	var GoldLabel = panel.FindChildTraverse('GoldLabel');
-  
+
 	if (useFormatting === 'full') {
-	    GoldLabel.text = FormatGold(gold);
+		GoldLabel.text = FormatGold(gold);
 	} else if (useFormatting === 'half') {
-	    GoldLabel.text = FormatComma(gold);
+		GoldLabel.text = FormatComma(gold);
 	} else {
-	    GoldLabel.text = gold;
+		GoldLabel.text = gold;
 	}
 }
 
@@ -598,7 +604,7 @@ var GoldListener
 	GameEvents.Subscribe("dota_inventory_changed", UpdateShop)
 
 	GameEvents.Subscribe('dota_player_update_query_unit', UpdateShopButton)
-    GameEvents.Subscribe('dota_player_update_selected_unit', UpdateShopButton)
+	GameEvents.Subscribe('dota_player_update_selected_unit', UpdateShopButton)
 
 	CustomNetTables.SubscribeNetTableListener("custom_shop", OnNetUpdate)
 
@@ -614,7 +620,7 @@ var GoldListener
 	GameUI.SetMouseCallback( MouseFilter )
 
 	//$.RegisterKeyBind(GetDotaHud(), "key_"+GetShopKeybind(), ToggleShop)
-	Game.AddCommand( "togglecustomshop", ToggleShop, "", 0)
+	Game.AddCommand( "togglecustomshop", ToggleShopKey, "", 0)
 	Game.CreateCustomKeyBind( GetShopKeybind() , "togglecustomshop" )
 
 	shopBits = CustomNetTables.GetTableValue("custom_shop", "shop_bits")
