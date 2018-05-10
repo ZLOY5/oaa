@@ -51,7 +51,7 @@ function InitQuickBuy() {
 	var shopLauncher = $.GetContextPanel().FindChildTraverse("shop_launcher_block")
 	shopLauncher.SetDraggable(true)
 	
-	$.RegisterEventHandler("DragDrop", shopLauncher, function(panel, draggedPanel) { 
+	$.RegisterEventHandler("DragDrop", quickBuyPanel, function(panel, draggedPanel) { 
 		if ( IsValidItemName(draggedPanel.itemname) && !draggedPanel.stickyDropped ) 
 			SetQuickBuyItem(draggedPanel.itemname)
 	})

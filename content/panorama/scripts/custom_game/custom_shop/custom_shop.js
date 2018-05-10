@@ -152,6 +152,10 @@ function Unhilight(itemName) {
 }
 
 function UpdateShopItem(panel) {
+
+	if (panel == undefined)
+		return
+
 	var itemName = panel.itemname
 
 	if (itemName == "")
@@ -359,15 +363,14 @@ function ConstructShop(shopName, schema) {
 			var label = $.CreatePanel("Label", option, "")
 			label.text = $.Localize("custom_shop_page_"+pageName)
 
-			
 			option.SetPanelEvent("onactivate", function() {
 				SetOpenedPage(option.GetSelectedButton().id)
 			})
 
 		}
 
-		//tabPicker.SetSelected(shop.pageList[0])
-		shop.openedPage = shop.pageList[0]
+		tabPicker.GetChild(0).checked = true
+		SetOpenedPage(shop.pageList[0])
 
 		AddPopularButton(shop)
 	}
@@ -383,6 +386,8 @@ function SetOpenedShop(shopName) {
 		
 		shop.SetHasClass("Hidden", shopList[i] != shopName)
 	}
+
+	UpdateShop()
 }
 
 function SetOpenedPage(pageName) {
@@ -404,6 +409,8 @@ function SetOpenedPage(pageName) {
 			shop.FindChildTraverse(name).SetHasClass("Hidden", name != pageName)
 		}
 	}
+
+	UpdateShop()
 } 
 
 function UpdateShop() {
@@ -461,7 +468,7 @@ function ShowShop(shopName) {
 
 	var shopUnit = GetShopUnit()
 
-	$.Msg(shopName)
+	//$.Msg(shopName)
 	if (shopName == undefined) {
 		if (Entities.IsInRangeOfCustomShop(shopUnit, shopBits.CUSTOM_SHOP_Side))
 			shopName = "Side"
@@ -470,8 +477,6 @@ function ShowShop(shopName) {
 	}
 
 	SetOpenedShop(shopName)
-
-	UpdateShop()
 
 	$.GetContextPanel().AddClass("StashVisible")
 
@@ -569,6 +574,14 @@ function OnItemCombined(event) {
 
 	if (quickBuyItem == event.itemName)
 		ClearQuickBuy()
+
+	UpdateCombines()
+}
+
+function OnSelectionChanged() {
+	$.Msg(Players.GetSelectedEntities(Game.GetLocalPlayerID())[0])
+	UpdateShopButton()
+	UpdateShop()
 }
 
 
@@ -581,7 +594,6 @@ function MouseFilter(eventName, arg) {
 		
 		
 		var target = GetMouseTarget()
-		//$.Msg(shopEntities[target])
 		if ( Entities.IsShop(target) ) { //click on shopkeeper
 			if (shopEntities[target] != undefined ) {
 				ToggleShop(shopEntities[target])
@@ -591,25 +603,27 @@ function MouseFilter(eventName, arg) {
 
 
 		//hide shop when left click on ground
-		HideShop()
+		if (target == 0)
+			HideShop()
 	}
 
 	return false
 }
 
-var GoldListener
 (function()
 {
 	GameEvents.Subscribe("dota_player_pick_hero", OnHeroPick)
 	GameEvents.Subscribe("dota_inventory_changed", UpdateShop)
 
-	GameEvents.Subscribe('dota_player_update_query_unit', UpdateShopButton)
-	GameEvents.Subscribe('dota_player_update_selected_unit', UpdateShopButton)
+	GameEvents.Subscribe('dota_player_update_query_unit', OnSelectionChanged)
+	GameEvents.Subscribe('dota_player_update_selected_unit', OnSelectionChanged)
 
 	CustomNetTables.SubscribeNetTableListener("custom_shop", OnNetUpdate)
 
-	if (GoldListener == undefined) 
-		GoldListener = PlayerTables.SubscribeNetTableListener('gold', OnGoldChanged)
+	if ($.GetContextPanel().GoldListener != undefined) 
+		PlayerTables.UnsubscribeNetTableListener($.GetContextPanel().GoldListener)
+
+	$.GetContextPanel().GoldListener = PlayerTables.SubscribeNetTableListener('gold', OnGoldChanged)
 
 	GameEvents.Subscribe( "local_player_item_combined", OnItemCombined)
 	

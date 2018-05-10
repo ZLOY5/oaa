@@ -14,6 +14,7 @@ function GetOrCreateShopItem(itemName) {
 	for (var panel of childs) {
 		if ( panel.itemname == itemName && !panel.combinesUsed) {
 			panel.combinesUsed = true
+			panel.requirement = null
 			return panel
 		}
 	}
@@ -129,7 +130,6 @@ function CombinesBuildItem(itemName) {
 			var item = GetOrCreateShopItem(list[i])
 			item.requirement = true
 
-			// positioning
 			var posReqX 
 			if (count == 1)
 				posReqX = posMainX
@@ -152,6 +152,7 @@ function CombinesBuildItem(itemName) {
 	}
 
 	CleanCombines(false)
+	UpdateCombines()
 } 
   
 function AddConnector(from, to) {
@@ -212,13 +213,16 @@ function CleanCombines(bAll) {
 function UpdateCombines()
 {
 	var usedItems = []
-	var unit = Players.GetSelectedEntities(Game.GetLocalPlayerID())[0]
+	var unit = Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID())
+	var courier = FindTeamCourier( Entities.GetTeamNumber(unit) )
 
 	for (var item of combinesItems.Children()) {
 		UpdateShopItem(item)
 
 		if (item.requirement) {
-			if (FindItemByNameInInventory(unit, item.itemname, usedItems) != -1) {
+			if (FindItemByNameInInventory(unit, item.itemname, usedItems) != -1
+				|| FindItemByNameInInventory(courier, item.itemname, usedItems) != -1)
+			{
 				item.AddClass("Purchased")
 			}
 			else {

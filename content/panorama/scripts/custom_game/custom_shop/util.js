@@ -121,3 +121,14 @@ function GetMouseTarget()
 
 	return 0
 }
+
+function FindTeamCourier(team) {
+	var couriers = Entities.GetAllEntitiesByClassname("npc_dota_courier")
+
+	for (var courier of couriers) {
+		if ( Entities.GetTeamNumber(courier) == team )
+			return courier
+	}
+
+	return -1
+}

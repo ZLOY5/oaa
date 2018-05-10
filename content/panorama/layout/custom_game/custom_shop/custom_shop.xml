@@ -18,7 +18,7 @@
 		<include src="file://{resources}/scripts/custom_game/custom_shop/quick_buy.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/custom_shop.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/search.js" />
-		<include src="file://{resources}/scripts/custom_game/custom_shop/gold.js" />
+		<!--<include src="file://{resources}/scripts/custom_game/custom_shop/gold.js" />-->
 	</scripts>
 
 	<script>
@@ -48,7 +48,7 @@
 				<Label id="StockAmount" text="{u:stock_amount}" />
 				<Panel id="OutOfStockOverlay" hittest="false" />
 				<!--<Label id="SuggestionPct" hittest="false" text="{s:suggestion_pct}%"/>
-				<!--<Panel id="SequenceArrow" hittest="false"/>-->
+				<Panel id="SequenceArrow" hittest="false"/>-->
 			</Panel>
 		</snippet>
 

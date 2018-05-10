@@ -567,6 +567,7 @@ DropDownMenu .DropDownChild:hover
 	horizontal-align: right;
 
 	//margin-bottom: 140px;
+	//margin-right: 320px;
 }
 
 .HUDFlipped #shop_launcher_block

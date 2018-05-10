@@ -143,14 +143,20 @@ function GetItemListToCombineItem(itemName, unit, variant, usedItems) {
 	if (usedItems == null)
 		usedItems = []
 
-	//var unit = Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID())
+	var hero = Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID())
+	var unitList = [ unit, hero ]
+	var courier = FindTeamCourier( Entities.GetTeamNumber(unit) )
+
+	if ( Entities.IsValidEntity(courier) )
+		unitList.push(courier)
+
 
 	var variantArr = entry.Requirements[variant]
 	
 	for (var i in variantArr) { 
 		var item = variantArr[i]
 		
-		var inventoryItemID = FindItemByNameInInventory(unit, item, usedItems)
+		var inventoryItemID = FindItemByNameInInventoryOfUnits(unitList, item, usedItems)
 		if (inventoryItemID != -1) //if unit already has this item
 			continue
 		else if ( IsItemSimple(item) ) //just add item to list if it simple
@@ -161,7 +167,7 @@ function GetItemListToCombineItem(itemName, unit, variant, usedItems) {
 
 	var recipe = itemName.replace("item_", "item_recipe_")
 	
-	if ( GetItemGoldCost(recipe) > 0 && FindItemByNameInInventory(unit, recipe, usedItems) == -1) {
+	if ( GetItemGoldCost(recipe) > 0 && FindItemByNameInInventoryOfUnits(unitList, recipe, usedItems) == -1) {
 		list.push(recipe)
 	}
 
@@ -194,21 +200,29 @@ function HasEnoughGoldForItem(itemName) {
 }
 
 function FindItemByNameInInventory(entIndex, itemName, ignoreList) {
-	
-	//if ( !Entities.HasItemInInventory(entIndex, itemName) ) --does not check stash slots
-	//	return -1
+
 	if (entIndex == undefined || !Entities.IsValidEntity(entIndex))
 		return -1
 
 	if (ignoreList == null)
 		ignoreList = []
 
+	var playerID = Entities.GetPlayerOwnerID(entIndex)
+	if ( Entities.IsCourier(entIndex) )
+		playerID = Game.GetLocalPlayerID()
+
+	var hero = Players.GetPlayerHeroEntityIndex( playerID )
+	
 	for (var slot = 0; slot < 15; slot++) {
 		var item = Entities.GetItemInSlot(entIndex, slot)
-		
 		//$.Msg(slot,item)
-		
-		if ( (Abilities.GetAbilityName(item) == itemName) && (ignoreList.indexOf(item) == -1) ) {
+		if (item != -1)
+			//$.Msg(Abilities.GetAbilityName(item)+" "+Items.GetPurchaser(item))
+
+		if ( Abilities.GetAbilityName(item) == itemName 
+			&& ignoreList.indexOf(item) == -1
+			&& Items.GetPurchaser(item) == hero ) 
+		{
 			ignoreList.push(item)
 			return item
 		}
@@ -216,3 +230,17 @@ function FindItemByNameInInventory(entIndex, itemName, ignoreList) {
 
 	return -1
 }
+
+function FindItemByNameInInventoryOfUnits(unitList, itemName, ignoreList) {
+	for (var unit of unitList) {
+		var item = FindItemByNameInInventory(unit, itemName, ignoreList)
+
+		if (item != -1)
+			return item
+	}
+
+	return -1
+}
+
+
+
