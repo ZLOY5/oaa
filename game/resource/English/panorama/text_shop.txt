@@ -1,0 +1,9 @@
+//=============================================================================
+// Shop
+//=============================================================================
+"custom_shop_page_basic"	"BASIC"
+"custom_shop_page_tier1"	"1"
+"custom_shop_page_tier2"	"2"
+"custom_shop_page_tier3"	"3"
+"custom_shop_page_tier4"	"4"
+"custom_shop_page_tier5"	"5"
