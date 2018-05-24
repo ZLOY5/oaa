@@ -1,5 +1,7 @@
 "use strict";
 
+var MAX_SEARCH_RESULTS = 12
+
 var seacrhItemList
 
 var searchContainer = $.GetContextPanel().FindChildTraverse("SearchContainer")
@@ -17,7 +19,7 @@ function GetSearchItemList() {
 		if (element.indexOf("recipe") != -1)
 			return false
 
-		if (element.indexOf("river") != -1) //item_river_painter,  idk what is this
+		if (element.indexOf("river") != -1) //item_river_painter, idk what is this
 			return false
 
 		if (IsItemPurchasable(element))
@@ -31,9 +33,6 @@ function GetSearchItemList() {
 
 function SearchTextChange() {
 	var text = searchTextEntry.text
-
-	if (searchTextEntry.flag)
-		return
 	
 	if (text == "") {
 		searchResult.AddClass("Hidden")
@@ -44,12 +43,11 @@ function SearchTextChange() {
 	searchResult.RemoveClass("Hidden")
 	$.GetContextPanel().AddClass("ShowSearchResults")
 
-
 	var res = SearchItems( text.trim().toLowerCase().split(/\s+/) )
 
 	searchResult.SetHasClass("Empty", res.length == 0)
 
-	for (var i = 0; i < 12; i++) {
+	for (var i = 0; i < MAX_SEARCH_RESULTS; i++) {
 		var panel = searchResultContents.FindChild("SearchResult"+i)
 
 		if (panel == undefined) 
@@ -57,21 +55,14 @@ function SearchTextChange() {
 
 		if (res[i] != undefined) {
 			panel.RemoveClass("Hidden")
-
 			panel.itemname = res[i]
-
-			if (i == 0) {
-				panel.SetFocus() //todo: focus on textentry and seachresult together like in def dota shop
-				//searchContainer.SetFocus()
-			}
 		}
 		else {
 			panel.AddClass("Hidden")
 		}
 	}
-	searchTextEntry.flag = true
-	searchTextEntry.UpdateFocusInContext(panel)
-	searchTextEntry.flag = false
+
+	SetSelectedSearchResult(0)
 }
 
 function SearchItems(list) {
@@ -124,7 +115,7 @@ function SearchItems(list) {
 
 	var result = resultsByStartOfName.concat(resultsOther)
 	//$.Msg(result)
-	return unique(result).splice(0,12) 
+	return unique(result).splice(0,MAX_SEARCH_RESULTS) 
 }
 
 function unique(arr) {
@@ -170,11 +161,48 @@ function HideSearch() {
 	searchResult.AddClass("Hidden")
 }
 
+//Next three functions realizes `selection` of search result item on click and move up/down by arrow-keys without dropping focus from text entry
+var selectedResult = 0
+function SetSelectedSearchResult(nResult) {
+	selectedResult = nResult
+
+	for (var i = 0; i < MAX_SEARCH_RESULTS; i++) {
+		var panel = searchResultContents.FindChild("SearchResult"+i)
+
+		if (panel == undefined) 
+			continue
+
+		panel.SetHasClass("Selected", nResult == i)
+
+		if (nResult == i)
+			CombinesBuildItem(panel.itemName)
+
+	}
+}
+
+function SearchSelectNextResult() {
+	var next = selectedResult + 1
+
+	var panel = searchResultContents.FindChild("SearchResult"+next)
+
+	if ( panel != undefined && !panel.BHasClass("Hidden") )
+		SetSelectedSearchResult(next)
+}
+
+function SearchSelectPreviousResult() {
+	var prev = selectedResult - 1
+
+	var panel = searchResultContents.FindChild("SearchResult"+prev)
+
+	if ( panel != undefined && !panel.BHasClass("Hidden") )
+		SetSelectedSearchResult(prev)
+}
+
 function InitSearch() {
 	searchResult.AddClass("Hidden")
 	$.GetContextPanel().RemoveClass("ShowSearchResults")
 
-	for (var i = 0; i < 12; i++) {
+	for (var i = 0; i < MAX_SEARCH_RESULTS; i++) {
 		CreateSearchResult(i)
 	}
 
@@ -182,6 +210,9 @@ function InitSearch() {
 
 	searchTextEntry.SetPanelEvent("ontextentrychange", SearchTextChange)
 	searchTextEntry.SetPanelEvent("onfocus", SearchTextChange)
+	searchTextEntry.SetPanelEvent("onmovedown", SearchSelectNextResult)
+	searchTextEntry.SetPanelEvent("onmoveup", SearchSelectPreviousResult)
+
 	//searchTextEntry.SetPanelEvent("onblur", function() {
 	//	$.GetContextPanel().RemoveClass("ShowSearchResults")
 	//	searchResult.AddClass("Hidden")
@@ -190,7 +221,7 @@ function InitSearch() {
 
 function CreateSearchResult(number) {
 	var panel = $.CreatePanel("Button", searchResultContents, "SearchResult"+number)
-	panel.BLoadLayoutFromString('<root><Button selectionpos="auto"/></root>', true, true)
+	//panel.BLoadLayoutFromString('<root><Button selectionpos="auto"/></root>', true, true)
 	panel.AddClass("SearchResult")
 	panel.AddClass("Hidden") 
 
@@ -238,8 +269,8 @@ function CreateSearchResult(number) {
 		BuyRequest(panel.itemName)
 	})
 
-	panel.SetPanelEvent("onfocus", function() { 
-		CombinesBuildItem(panel.itemName)
+	panel.SetPanelEvent("onactivate", function() { 
+		SetSelectedSearchResult(number)
 	})
 
 	panel.SetDraggable(true)

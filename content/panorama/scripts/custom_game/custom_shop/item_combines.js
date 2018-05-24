@@ -15,6 +15,7 @@ function GetOrCreateShopItem(itemName) {
 		if ( panel.itemname == itemName && !panel.combinesUsed) {
 			panel.combinesUsed = true
 			panel.requirement = null
+			panel.RemoveClass("Purchased")
 			return panel
 		}
 	}
@@ -66,7 +67,7 @@ function CombinesBuildItem(itemName) {
 
 	if (bHasReq && bHasPart) {
 		posPartY = posMainY - 30
-		posReqY = posMainY + 30
+		posReqY = posMainY + 32
 	}
 	else if (bHasReq) {
 		posMainY = posMainY - offset

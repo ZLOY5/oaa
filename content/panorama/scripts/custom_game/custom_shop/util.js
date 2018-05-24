@@ -132,3 +132,12 @@ function FindTeamCourier(team) {
 
 	return -1
 }
+
+function IsValidPanel(panel) {
+	try {
+		panel.BHasClass("class")
+		return true
+	} catch (err) {
+		return false
+	}
+}

@@ -77,7 +77,7 @@
 	color: #dddddd;
 }
 
-.SearchResult:focus Label
+.SearchResult.Selected Label
 {
 	color: #ffffff;
 }

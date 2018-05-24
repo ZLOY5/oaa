@@ -87,7 +87,8 @@ function SetQuickBuyItem(itemName) {
 	quickBuyItem = itemName
 	quickBuyPanel.RemoveClass("ShowHint")
 
-	var list = GetItemListToCombineItem(itemName, Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID()) ) 
+	var unit = Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID())
+	var list = GetBestItemListVariantToBuy(itemName, unit) 
 
 	for (var i = 0; i < 8; i++) {
 		var item = list[i]

@@ -7,7 +7,7 @@ var shopList = [];
 var openedShop = "";
 var popular = null;
 var shopBits = null;
-var shopItems = {};
+//var shopItems = {};
 var shopOpen = false;
 
 
@@ -105,10 +105,10 @@ function CreateShopItem(itemName, parentPanel, id) {
 
 	UpdateShopItem(item)
 
-	if (shopItems[itemName] == undefined)
+	/*if (shopItems[itemName] == undefined)
 		shopItems[itemName] = []
 
-	shopItems[itemName].push(item)
+	shopItems[itemName].push(item)*/
 
 	return item
 } 
@@ -153,7 +153,7 @@ function Unhilight(itemName) {
 
 function UpdateShopItem(panel) {
 
-	if (panel == undefined)
+	if (panel == undefined || !IsValidPanel(panel) )
 		return
 
 	var itemName = panel.itemname
@@ -168,7 +168,7 @@ function UpdateShopItem(panel) {
 	
 	var team = Players.GetTeam(Game.GetLocalPlayerID())
 
-	var canPurchase = HasEnoughGoldForItem(itemName) && !IsItemOutOfStock(itemName)
+	var canPurchase = IsItemPurchasable(itemName) && HasEnoughGoldForItem(itemName) && !IsItemOutOfStock(itemName)
 	panel.SetHasClass("CanPurchase", canPurchase)
 
 	if (entry.StockCount != undefined) {
@@ -273,10 +273,10 @@ function BuyRequest(itemName) {
 	}*/
 
 	
-	var list = GetItemListToCombineItem(itemName, unit)
+	var list = GetBestItemListVariantToBuy(itemName, unit)
 	$.Msg(list)
 
-	if (!HasEnoughGoldForItem(itemName)) {
+	if ( GetGoldCostOfItemList(list) > Players.GetGold(plID) ) {
 		GameEvents.SendEventClientSide('dota_hud_error_message', { reason: 63}) //need more gold
 		return
 	}
@@ -365,11 +365,12 @@ function ConstructShop(shopName, schema) {
 
 			option.SetPanelEvent("onactivate", function() {
 				SetOpenedPage(option.GetSelectedButton().id)
+				UpdateShop()
 			})
 
 		}
 
-		tabPicker.GetChild(0).checked = true
+		//tabPicker.GetChild(0).checked = true
 		SetOpenedPage(shop.pageList[0])
 
 		AddPopularButton(shop)
@@ -377,6 +378,10 @@ function ConstructShop(shopName, schema) {
 }
 
 function SetOpenedShop(shopName) {
+
+	if (shopList.indexOf(shopName) == -1)
+		return
+
 	openedShop = shopName;
 	for (var i = 0; i < shopList.length; i++) {
 		var shop = $.GetContextPanel().FindChildTraverse("GridShop"+shopList[i])
@@ -387,10 +392,11 @@ function SetOpenedShop(shopName) {
 		shop.SetHasClass("Hidden", shopList[i] != shopName)
 	}
 
-	UpdateShop()
+	//UpdateShop()
 }
 
 function SetOpenedPage(pageName) {
+
 	var shop = $.GetContextPanel().FindChildTraverse("GridShop"+openedShop)
 	
 	if (shop == null) 
@@ -410,7 +416,16 @@ function SetOpenedPage(pageName) {
 		}
 	}
 
-	UpdateShop()
+	var tabPicker = shop.FindChild("TabPicker")
+
+	if ( tabPicker != undefined) {
+		var button = tabPicker.FindChild(pageName)
+
+		if ( button != undefined )
+			button.checked = true
+	}
+
+	//UpdateShop()
 } 
 
 function UpdateShop() {
@@ -461,11 +476,7 @@ function HideShop() {
 	$.GetContextPanel().FindChildTraverse("stash").RemoveClass("ShopOpen")
 }
 
-function ShowShop(shopName) {
-	shopOpen = true
-	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopOpen", true)
-	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopClosing", false)
-
+function ShowShop(shopName, pageName) {
 	var shopUnit = GetShopUnit()
 
 	//$.Msg(shopName)
@@ -477,6 +488,17 @@ function ShowShop(shopName) {
 	}
 
 	SetOpenedShop(shopName)
+
+	if ( pageName != undefined )
+		SetOpenedPage(pageName)
+
+	UpdateShop()
+
+	shopOpen = true
+	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopOpen", true)
+	$.GetContextPanel().FindChild("CustomShop").SetHasClass("ShopClosing", false)
+
+
 
 	$.GetContextPanel().AddClass("StashVisible")
 
@@ -500,6 +522,36 @@ function GetShopUnit() { //unit that currently use shop
 
 function GetShopKeybind() {
 	return "f4"//FindDotaHudElement(DashboardCore).FindChildTraverse(cstring cstring_1)
+}
+
+function ShowItem(itemName) {
+	var shop
+	var page 
+
+	for (var shopName of shopList) {
+		var shopPanel = $.GetContextPanel().FindChildTraverse("GridShop"+shopName)
+
+		if (shopPanel == null) 
+			continue
+
+		for (var pageName of shopPanel.pageList) {
+			var pagePanel = shopPanel.FindChildTraverse(pageName)
+		
+			for (var item in pagePanel.items) {
+				if ( item == itemName) {
+					shop = shopName
+					page = pageName
+					break
+				}
+			} 
+		}
+	}
+	//$.Msg(shop)
+	//$.Msg(page)
+
+	ShowShop(shop, page)
+
+	CombinesBuildItem(itemName)
 }
 
 function OnUnitShopMaskChanged(unit) {
@@ -655,7 +707,8 @@ function MouseFilter(eventName, arg) {
 	}
 
 	SetOpenedShop("Home") 
-	SetOpenedPage("Basic")  
+	SetOpenedPage("Basic") 
+	UpdateShop()
 
 	OnHeroPick()
 
@@ -663,5 +716,8 @@ function MouseFilter(eventName, arg) {
 	InitQuickBuy() 
 
 	UpdateShopButton()
+
+	GameUI.CustomShop = {}
+	GameUI.CustomShop.ShowItem = ShowItem
 
 })();

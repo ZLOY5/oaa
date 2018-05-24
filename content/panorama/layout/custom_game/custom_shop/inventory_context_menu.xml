@@ -1,0 +1,50 @@
+<root>
+	<styles>
+		<include src="s2r://panorama/styles/dotastyles.vcss_c" />
+		<include src="s2r://panorama/styles/hudstyles.vcss_c" />
+		<include src="s2r://panorama/styles/custom_game/custom_shop/inventory_context_menu.css" />
+	</styles>
+
+	<scripts>
+		<include src="file://{resources}/scripts/custom_game/custom_shop/inventory_context_menu.js" /> 
+	</scripts>
+
+	<Panel>
+		<Button id="ShowUpgradeTree" onactivate="ShowUpgradeTree()" >
+			<Label text="#DOTA_InventoryMenu_ShowUpgradeTree" />
+		</Button>
+
+		<Button id="ShowInShop" onactivate="ShowInShop()">
+			<Label text="#DOTA_InventoryMenu_ShowInShop" />
+		</Button>
+
+		<Button id="CombineLock" onactivate="LockCombine()">
+			<Label text="#DOTA_InventoryMenu_LockCombine" />
+		</Button>
+
+		<Button id="CombineUnlock" onactivate="UnlockCombine()">
+			<Label text="#DOTA_InventoryMenu_UnlockCombine" />
+		</Button>
+
+		<Button id="Sell" onactivate="Sell()">
+			<Label text="#DOTA_InventoryMenu_Sell" />
+			<Label id="SellBackSeconds" text="{s:sell_back_seconds}" />
+		</Button>
+
+		<Button id="Disassemble" onactivate="Disassemble()">
+			<Label text="#DOTA_InventoryMenu_Disassemble" />
+		</Button>
+
+		<Button id="DropFromStash" onactivate="DropFromStash()">
+			<Label text="#DOTA_InventoryMenu_DropFromStash" />
+		</Button>
+
+		<Button id="Alert" onactivate="Alert()">
+			<Label text="#DOTA_InventoryMenu_Alertable" />
+		</Button>
+		
+		<Button id="MoveToStash" onactivate="MoveToStash()">
+			<Label text="#DOTA_InventoryMenu_MoveToStash" />
+		</Button>
+	</Panel>
+</root>

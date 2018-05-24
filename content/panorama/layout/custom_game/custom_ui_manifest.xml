@@ -92,13 +92,14 @@
     <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/oaa_game_info.xml" />
     <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/barebones_notifications.xml" />
     <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/timer.xml" />
+    <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/custom_shop/custom_shop.xml" />
     <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/hero_selection.xml" />
     <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/discord.xml" />
     <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/precache.xml" />
     <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/bottle_announcement.xml" />
     <CustomUIElement type="EndScreen"           layoutfile="file://{resources}/layout/custom_game/multiteam_end_screen.xml" />
 
-    <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/custom_shop/custom_shop.xml" />
+    
 
     <!-- From Overthrow.
 

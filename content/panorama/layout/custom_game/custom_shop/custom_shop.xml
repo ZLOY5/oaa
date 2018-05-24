@@ -18,6 +18,7 @@
 		<include src="file://{resources}/scripts/custom_game/custom_shop/quick_buy.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/custom_shop.js" />
 		<include src="file://{resources}/scripts/custom_game/custom_shop/search.js" />
+		<include src="file://{resources}/scripts/custom_game/custom_shop/inventory.js" />
 		<!--<include src="file://{resources}/scripts/custom_game/custom_shop/gold.js" />-->
 	</scripts>
 

@@ -124,6 +124,33 @@ function IsItemOutOfStock(itemName) {
 
 	return false
 }
+
+//very expensive
+function GetBestItemListVariantToBuy(itemName, unit, usedItems) {
+	
+	if ( IsItemSimple(itemName) )
+		return [ itemName ]
+
+	var entry = GetItemEntry(itemName)
+	var variants = []
+
+	for (var i = 0; i < entry.Requirements.length; i++) {
+		variants[i] = GetItemListToCombineItem(itemName, unit, i, usedItems)
+		//$.Msg(itemName+" "+i+" "+variants[i])
+	}
+
+	variants.sort(function(a,b) {
+		return GetGoldCostOfItemList(a) - GetGoldCostOfItemList(b);
+	})
+
+	for (var variant of variants) {
+		if ( !HasItemListUnpurchasableItems(variant) ) {
+			return variant
+		}
+	}
+
+	return variants[0]
+}
  
 // return array with names of items that requires to buy for itemName
 function GetItemListToCombineItem(itemName, unit, variant, usedItems) {
@@ -135,7 +162,7 @@ function GetItemListToCombineItem(itemName, unit, variant, usedItems) {
 		return list
 	}
 
-	//$.Msg(itemName)
+	//$.Msg(itemName) 
 
 	if (entry.Requirements[variant] == null)
 		variant = 0
@@ -143,12 +170,18 @@ function GetItemListToCombineItem(itemName, unit, variant, usedItems) {
 	if (usedItems == null)
 		usedItems = []
 
-	var hero = Players.GetPlayerHeroEntityIndex(Game.GetLocalPlayerID())
-	var unitList = [ unit, hero ]
-	var courier = FindTeamCourier( Entities.GetTeamNumber(unit) )
+	var unitList = []
+	if ( unit != undefined ) {
+		var hero = Players.GetPlayerHeroEntityIndex( Entities.GetPlayerOwnerID(unit) )
 
-	if ( Entities.IsValidEntity(courier) )
-		unitList.push(courier)
+		unitList.push(unit)
+		unitList.push(hero)
+
+		var courier = FindTeamCourier( Entities.GetTeamNumber(hero) )
+		if ( Entities.IsValidEntity(courier) ) {
+			unitList.push(courier)
+		}
+	}
 
 
 	var variantArr = entry.Requirements[variant]
@@ -159,10 +192,10 @@ function GetItemListToCombineItem(itemName, unit, variant, usedItems) {
 		var inventoryItemID = FindItemByNameInInventoryOfUnits(unitList, item, usedItems)
 		if (inventoryItemID != -1) //if unit already has this item
 			continue
-		else if ( IsItemSimple(item) ) //just add item to list if it simple
+		else if ( IsItemSimple(item) || item == itemName ) //just add item to list if it simple
 			list.push(item)
 		else 
-			list.push.apply( list, GetItemListToCombineItem( item, unit , 0, usedItems) )
+			list.push.apply( list, GetItemListToCombineItem(item, unit, variant, usedItems) )
 	}
 
 	var recipe = itemName.replace("item_", "item_recipe_")
@@ -201,30 +234,31 @@ function HasEnoughGoldForItem(itemName) {
 
 function FindItemByNameInInventory(entIndex, itemName, ignoreList) {
 
-	if (entIndex == undefined || !Entities.IsValidEntity(entIndex))
+	if (entIndex == undefined && !Entities.IsValidEntity(entIndex))
 		return -1
 
-	if (ignoreList == null)
-		ignoreList = []
-
-	var playerID = Entities.GetPlayerOwnerID(entIndex)
+	var playerID
 	if ( Entities.IsCourier(entIndex) )
 		playerID = Game.GetLocalPlayerID()
+	else
+		playerID = Entities.GetPlayerOwnerID(entIndex)
 
 	var hero = Players.GetPlayerHeroEntityIndex( playerID )
 	
 	for (var slot = 0; slot < 15; slot++) {
 		var item = Entities.GetItemInSlot(entIndex, slot)
-		//$.Msg(slot,item)
-		if (item != -1)
-			//$.Msg(Abilities.GetAbilityName(item)+" "+Items.GetPurchaser(item))
+		
+		if (item == -1)
+			continue
 
-		if ( Abilities.GetAbilityName(item) == itemName 
-			&& ignoreList.indexOf(item) == -1
-			&& Items.GetPurchaser(item) == hero ) 
-		{
-			ignoreList.push(item)
-			return item
+		if ( Abilities.GetAbilityName(item) == itemName && Items.GetPurchaser(item) == hero ) {
+			if ( ignoreList == undefined ) {
+				return item
+			}
+			else if ( ignoreList.indexOf(item) == -1 ) {
+				ignoreList.push(item)
+				return item
+			}
 		}
 	}
 
@@ -243,4 +277,4 @@ function FindItemByNameInInventoryOfUnits(unitList, itemName, ignoreList) {
 }
 
 
-
+Items.GetItemAvailability = GetItemAvailability
