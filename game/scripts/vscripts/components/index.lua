@@ -24,5 +24,11 @@ require('components/heroselection/index')
 require('components/music/index')
 require('components/items/index')
 require('components/bottlepass/index')
+<<<<<<< HEAD
 require('components/custom_shop/index')
 
+=======
+
+-- should be last
+require('components/saveload/index')
+>>>>>>> upstream/master
